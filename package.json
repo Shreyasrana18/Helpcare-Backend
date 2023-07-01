@@ -1,0 +1,27 @@
+{
+  "name": "capstone-backend",
+  "version": "1.0.0",
+  "description": "Capstone project ",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Shreyasrana18/Helpcare-Backend.git"
+  },
+  "author": "Shreyas Rana, Aditya Vegesina",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Shreyasrana18/Helpcare-Backend/issues"
+  },
+  "homepage": "https://github.com/Shreyasrana18/Helpcare-Backend#readme",
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.22"
+  }
+}
