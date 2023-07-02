@@ -1,9 +1,9 @@
 const mongoose = require('mongoose');
-const patientSchema = mongoose.Schema({
+const patientPersonalInfoSchema = mongoose.Schema({
     name: {
         type: String,
         required: true
-     },
+    },
     age: {
         type: Number,
         required: true
@@ -30,4 +30,6 @@ const patientSchema = mongoose.Schema({
     }
 );
 
-module.exports = mongoose.model('Patient', patientSchema);
+
+
+module.exports = mongoose.model('Patient', patientPersonalInfoSchema);
