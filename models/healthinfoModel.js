@@ -15,14 +15,6 @@ const healthInfoSchema = mongoose.Schema({
         type: String,
         required: true
     },
-    bloodpressure: {
-        type: String,
-        required: false
-    },
-    heartrate: {
-        type: String,
-        required: false
-    },
     weight: {
         type: Number,
         required: true
