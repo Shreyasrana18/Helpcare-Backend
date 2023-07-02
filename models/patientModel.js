@@ -24,6 +24,10 @@ const patientPersonalInfoSchema = mongoose.Schema({
         type: String,
         required: true
     },
+    emergencycontact: {
+        type:Number,
+        required: false
+    }
 },
     {
         timestamps: true,

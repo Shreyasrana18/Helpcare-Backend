@@ -16,7 +16,7 @@ const personalInfo = asyncHandler(async (req, res) => {
 // create personal information of a patient
 const createPersonalInfo = asyncHandler(async (req, res) => {
     console.log(req.body);
-    const { name, age, gender, address, email, contact } = req.body;
+    const { name, age, gender, address, email, contact, emergencycontact } = req.body;
     if (!name || !age || !gender || !address || !email || !contact) {
         res.status(404);
         throw new Error("Enter all required fields");
@@ -28,6 +28,7 @@ const createPersonalInfo = asyncHandler(async (req, res) => {
         address,
         email,
         contact,
+        emergencycontact
     });
     res.status(201).json(patient);
 });
