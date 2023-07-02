@@ -46,7 +46,7 @@ const healthinfo = asyncHandler(async (req, res) => {
 // create health information of a patient
 const createHealthInfo = asyncHandler(async (req, res) => {
     console.log(req.body);
-    const { patientId, bloodgroup, height, weight, allergies, bloodpressure, heartrate } = req.body;
+    const { patientId, bloodgroup, height, weight, allergies} = req.body;
     if (!patientId || !bloodgroup || !height || !weight) {
         res.status(404);
         throw new Error("Enter all required fields");
@@ -59,8 +59,6 @@ const createHealthInfo = asyncHandler(async (req, res) => {
         height,
         weight,
         allergies,
-        bloodpressure,
-        heartrate,
         bmi
     });
     res.status(201).json(patient);

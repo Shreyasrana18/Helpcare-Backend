@@ -4,8 +4,8 @@ const { healthinfo, personalInfo, timelineInfo, createPersonalInfo ,createHealth
 
 router.route('/healthinfo/:id').get(healthinfo);
 router.route('/healthinfo').post(createHealthInfo);
-router.route('/personalinfo').post(createPersonalInfo);
 router.route('/personalinfo/:id').get(personalInfo);
+router.route('/personalinfo').post(createPersonalInfo);
 router.route('/timelineinfo').get(timelineInfo);
 
 module.exports = router; 
