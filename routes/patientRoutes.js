@@ -10,7 +10,7 @@ router.route('/healthinfo/:id').get(healthinfo).put(updateHealthInfo).delete(del
 router.route('/healthinfo').post(createHealthInfo);
 
 // Routes for personal information of patient
-router.route('/personalinfo/:id').get(personalInfo).put(updatePersonalInfo).delete(deletePersonalInfo);
+router.route('/personalinfo/:userID').get(personalInfo).put(updatePersonalInfo).delete(deletePersonalInfo);
 router.route('/personalinfo').post(createPersonalInfo);
 
 // Routes for timeline information of patient

@@ -1,56 +1,77 @@
 const asyncHandler = require("express-async-handler");
 const Patient = require("../models/patientModel");
+const mongoose = require("mongoose");
 
 
 // get personal information of a patient
 const personalInfo = asyncHandler(async (req, res) => {
-    const personalinfo = await Patient.findById(req.params.id);
+    const personalinfo = await Patient.find({ userID: new mongoose.Types.ObjectId(req.params.userID) });
     if (!personalinfo) {
         res.status(404);
         throw new Error("Patient not found");
     }
-    res.status(201).json(personalinfo);
+    res.status(201).json(personalinfo[0].patientPersonalInformation);
 });
 
 // create personal information of a patient
 const createPersonalInfo = asyncHandler(async (req, res) => {
-    const { name, age, gender, address, email, contact, emergencycontact } = req.body;
+    const { userID, name, age, gender, address, email, contact, emergencycontact } = req.body;
     if (!name || !age || !gender || !address || !email || !contact) {
         res.status(404);
         throw new Error("Enter all required fields");
     }
-    const patient = await Patient.create({
-        name,
-        age,
-        gender,
-        address,
-        email,
-        contact,
-        emergencycontact
+    const patient = new Patient({
+        userID: userID,
+        patientPersonalInformation: {
+            name: name,
+            age: age,
+            gender: gender,
+            address: address,
+            email: email,
+            contact: contact,
+            emergencycontact: emergencycontact
+        }
     });
+    try {
+        const savedPatient = await patient.save();
+        console.log('Patient saved:', savedPatient);
+    } catch (error) {
+        console.error('Error saving patient:', error);
+    }
     res.status(201).json(patient);
 });
 
 // update personal information of a patient
 const updatePersonalInfo = asyncHandler(async (req, res) => {
-    const patient = await Patient.findById(req.params.id);
+    const filter = { userID: new mongoose.Types.ObjectId(req.params.userID) };
+    const update = {
+        $set: {
+            'patientPersonalInformation.name': req.body.name,
+            'patientPersonalInformation.age': req.body.age,
+            'patientPersonalInformation.gender': req.body.gender,
+            'patientPersonalInformation.address': req.body.address,
+            'patientPersonalInformation.email': req.body.email,
+            'patientPersonalInformation.contact': req.body.contact,
+            'patientPersonalInformation.emergencycontact': req.body.emergencycontact
+        }
+    };
+    const options = { new: true };
+    const patient = await Patient.findOneAndUpdate(filter, update, options);
     if (!patient) {
         res.status(404);
         throw new Error("Patient not found");
     }
-    const updatedPersonalinfo = await Patient.findByIdAndUpdate(req.params.id,
-        req.body, { new: true });
-    res.status(201).json(updatedPersonalinfo);
+    res.status(201).json(patient['patientPersonalInformation']);
 });
 
 // delete personal information of a patient
 const deletePersonalInfo = asyncHandler(async (req, res) => {
-    const patient = await Patient.findById(req.params.id);
+    const patient = await Patient.find({ userID: new mongoose.Types.ObjectId(req.params.userID) });
     if (!patient) {
         res.status(404);
         throw new Error("Patient not found");
     }
-    await Patient.deleteOne({ _id: req.params.id });
+    await Patient.deleteOne({ _id: req.params.id }).select('personalInformation');
     res.status(200).json({ message: "Patient removed" });
 
 });
