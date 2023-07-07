@@ -33,12 +33,11 @@ const createPersonalInfo = asyncHandler(async (req, res) => {
         }
     });
     try {
-        const savedPatient = await patient.save();
-        console.log('Patient saved:', savedPatient);
+        await patient.save();
     } catch (error) {
         console.error('Error saving patient:', error);
     }
-    res.status(201).json(patient);
+    res.status(201).json(patient['patientPersonalInformation']);
 });
 
 // update personal information of a patient
@@ -66,13 +65,15 @@ const updatePersonalInfo = asyncHandler(async (req, res) => {
 
 // delete personal information of a patient
 const deletePersonalInfo = asyncHandler(async (req, res) => {
-    const patient = await Patient.find({ userID: new mongoose.Types.ObjectId(req.params.userID) });
+    const filter = { userID: new mongoose.Types.ObjectId(req.params.userID) };
+    const update = { $unset: { patientPersonalInformation: 1 } };
+    const options = { new: true };
+    const patient = await Patient.findOneAndUpdate(filter, update, options);
     if (!patient) {
         res.status(404);
         throw new Error("Patient not found");
     }
-    await Patient.deleteOne({ _id: req.params.id }).select('personalInformation');
-    res.status(200).json({ message: "Patient removed" });
+    res.status(200).json({ message: "Patient's Personal Information removed" });
 
 });
 

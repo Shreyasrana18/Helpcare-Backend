@@ -1,58 +1,73 @@
 const asyncHandler = require("express-async-handler");
 // const PatientTimeline = require("../models/timelineModel");
-const PatientTimeline = require("../models/patientModel");
+const Patient = require("../models/patientModel");
+const mongoose = require("mongoose");
 
 // get timeline information of a patient
 const timelineInfo = asyncHandler(async (req, res) => {
-    const timelineinfo = await PatientTimeline.findById(req.params.id).select('timelineInformation');
-    if (!timelineinfo) {
+    const timelineinfo = await Patient.find({ userID: new mongoose.Types.ObjectId(req.params.userID) });
+    if (!timelineInfo) {
         res.status(404);
         throw new Error("Patient's PatientTimeline not found");
     }
-    res.status(201).json(timelineinfo.timelineInformation);
+    res.status(201).json(timelineinfo[0].timelineInformation);
 });
 
 // create timeline information of a patient
-const createTimelineInfo = asyncHandler(async (req, res) => {
-    const {userID, date, event, details, attachments } = req.body;
-    console.log(req.body);
-    if (!date || !event) {
-        res.status(404);
-        throw new Error("Enter all required fields");
-    }
-    const patient = await PatientTimeline.create({
-        userID,
-        timelineInformation: {
-            date,
-            event,
-            details,
-            attachments
-        },
-    });
-    res.status(201).json(patient);
-});
+// const createTimelineInfo = asyncHandler(async (req, res) => {
+//     const { userID, date, event, details, attachments } = req.body;
+//     if (!date || !event) {
+//         res.status(404);
+//         throw new Error("Enter all required fields");
+//     }
+//     const patient = new Patient({
+//         userID: userID,
+//         timelineInformation: {
+//             date: date,
+//             event: event,
+//             details: details,
+//             attachments: attachments
+//         }
+//     });
+//     try {
+//         await patient.save();
+//     } catch (error) {
+//         console.error('Error saving patient:', error);
+//     }
+//     res.status(201).json(patient);
+// });
 
 // update timeline information of a patient
 const updateTimelineInfo = asyncHandler(async (req, res) => {
-    const patient = await PatientTimeline.findById(req.params.id).select('timelineInformation');
+    const filter = { userID: new mongoose.Types.ObjectId(req.params.userID) };
+    const update = {
+        $set: {
+            'timelineInformation.date': req.body.date,
+            'timelineInformation.event': req.body.event,
+            'timelineInformation.details': req.body.details,
+            'timelineInformation.attachments': req.body.attachments
+        }
+    };
+    const options = { new: true };
+    const patient = await Patient.findOneAndUpdate(filter, update, options);
     if (!patient) {
         res.status(404);
         throw new Error("Patient not found");
     }
-    const updatedTimelineinfo = await PatientTimeline.findByIdAndUpdate(req.params.id,
-        req.body, { new: true }).select('timelineInformation');
-    res.status(201).json(updatedTimelineinfo.timelineInformation);
+    res.status(201).json(patient.timelineInformation);
 });
 
 // delete timeline information of a patient
 const deleteTimelineInfo = asyncHandler(async (req, res) => {
-    const patient = await PatientTimeline.findById(req.params.id).select('timelineInformation');
+    const filter = { userID: new mongoose.Types.ObjectId(req.params.userID) };
+    const update = { $unset: { timelineInformation: 1 } };
+    const options = { new: true };
+    const patient = await Patient.findOneAndUpdate(filter, update, options);
     if (!patient) {
         res.status(404);
         throw new Error("Patient not found");
     }
-    await PatientTimeline.deleteOne({ _id: req.params.id }).select('timelineInformation');
     res.status(200).json({ message: "Health Timeline removed" });
 });
 
-module.exports = { timelineInfo, createTimelineInfo, updateTimelineInfo, deleteTimelineInfo }; 
+module.exports = { timelineInfo, updateTimelineInfo, deleteTimelineInfo }; 
