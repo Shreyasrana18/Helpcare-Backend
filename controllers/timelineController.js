@@ -6,6 +6,11 @@ const mongoose = require("mongoose");
 // get timeline information of a patient
 const timelineInfo = asyncHandler(async (req, res) => {
     const timelineinfo = await Patient.find({ userID: new mongoose.Types.ObjectId(req.params.userID) });
+    // check if the user is authorized to access the timeline information
+    if (timelineinfo[0].userID.valueOf().toString() != req.user.id) {
+        res.status(401);
+        throw new Error("User not authorized");
+    }
     if (!timelineInfo) {
         res.status(404);
         throw new Error("Patient's PatientTimeline not found");
@@ -13,32 +18,13 @@ const timelineInfo = asyncHandler(async (req, res) => {
     res.status(201).json(timelineinfo[0].timelineInformation);
 });
 
-// create timeline information of a patient
-// const createTimelineInfo = asyncHandler(async (req, res) => {
-//     const { userID, date, event, details, attachments } = req.body;
-//     if (!date || !event) {
-//         res.status(404);
-//         throw new Error("Enter all required fields");
-//     }
-//     const patient = new Patient({
-//         userID: userID,
-//         timelineInformation: {
-//             date: date,
-//             event: event,
-//             details: details,
-//             attachments: attachments
-//         }
-//     });
-//     try {
-//         await patient.save();
-//     } catch (error) {
-//         console.error('Error saving patient:', error);
-//     }
-//     res.status(201).json(patient);
-// });
 
 // update timeline information of a patient
 const updateTimelineInfo = asyncHandler(async (req, res) => {
+    if (req.params.userID != req.user.id) {
+        res.status(401);
+        throw new Error("User not authorized");
+    }
     const filter = { userID: new mongoose.Types.ObjectId(req.params.userID) };
     const update = {
         $set: {
@@ -59,6 +45,10 @@ const updateTimelineInfo = asyncHandler(async (req, res) => {
 
 // delete timeline information of a patient
 const deleteTimelineInfo = asyncHandler(async (req, res) => {
+    if (req.params.userID != req.user.id) {
+        res.status(401);
+        throw new Error("User not authorized");
+    }
     const filter = { userID: new mongoose.Types.ObjectId(req.params.userID) };
     const update = { $unset: { timelineInformation: 1 } };
     const options = { new: true };
