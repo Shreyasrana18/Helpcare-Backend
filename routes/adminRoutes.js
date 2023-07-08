@@ -1,9 +1,14 @@
-const express=require('express');
+const express = require('express');
+const router = express.Router();
 
-const router=express.Router();
+const { adminInfo, updateAdmininfo, createAdminID, deleteAdmininfo } = require('../controllers/Admin/adminInfoController');
+const validateToken = require('../middleware/validateTokenHandler');
 
-router.route('/').get((req,res)=>{
-    res.status(200).json({message:"Admin route"});
-});
 
-module.exports=router;
+// Middleware to validate token
+router.use(validateToken);
+
+router.route('/admininfo').post(createAdminID)
+router.route('/admininfo/:userID').get(adminInfo).put(updateAdmininfo).delete(deleteAdmininfo);
+
+module.exports = router;

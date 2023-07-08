@@ -27,7 +27,6 @@ const updateHealthInfo = asyncHandler(async (req, res) => {
         throw new Error("User not authorized");
     }
     const filter = { userID: new mongoose.Types.ObjectId(req.params.userID) };
-    console.log(req.body, filter);
     const update = {
         $set: {
             'healthInformation.bloodgroup': req.body.bloodgroup,

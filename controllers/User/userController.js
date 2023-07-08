@@ -26,7 +26,6 @@ const registerUser = asyncHandler(async (req, res) => {
         password: hashedPassword,
         role
     });
-    console.log("User created: ", user);
     res.status(201).json(user);
 });
 
