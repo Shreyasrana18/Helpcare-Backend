@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 const { adminInfo, updateAdmininfo, createAdminID, deleteAdmininfo } = require('../controllers/Admin/adminInfoController');
+const { doctorList, addDoctor } = require('../controllers/Admin/adminDoctorController');
 const validateToken = require('../middleware/validateTokenHandler');
 
 
@@ -11,4 +12,7 @@ router.use(validateToken);
 router.route('/admininfo').post(createAdminID)
 router.route('/admininfo/:userID').get(adminInfo).put(updateAdmininfo).delete(deleteAdmininfo);
 
-module.exports = router;
+router.route('/doctorlist/:userID').get(doctorList);
+router.route('/doctorlist/:userID').post(addDoctor);
+
+module.exports = router; 

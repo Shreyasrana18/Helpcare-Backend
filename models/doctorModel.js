@@ -4,21 +4,19 @@ const doctorSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
     },
-    personalInformation: {
-        name: {
-            type: String,
-        },
-        specialization: {
-            type: String,
-        },
-        experience: {
-            type: Number,
-        },
-        contact: {
-            type: String,
-        },
+    name: {
+        type: String,
     },
+    specialization: {
+        type: String,
+    },
+    experience: {
+        type: Number,
+    },
+    contact: {
+        type: String,
+    },
+
 });
 
-const Doctor = mongoose.model('Doctor', doctorSchema);
-module.exports = Doctor;
+module.exports= mongoose.model('Doctor', doctorSchema);
