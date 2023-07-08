@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const { v4: uuidv4 } = require('uuid');
 const userSchema = new mongoose.Schema(
     {
         username: {
@@ -15,6 +14,12 @@ const userSchema = new mongoose.Schema(
             type: String,
             required: [true, "please add the password"],
         },
+        role: {
+            type: String,
+            enum: ['patient', 'admin', 'doctor'],
+            default: 'patient',
+            required: [true, "please add the role"],
+          }
     },
     {
         timestamps: true,

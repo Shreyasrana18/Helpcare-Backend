@@ -1,6 +1,6 @@
 const asyncHandler = require("express-async-handler");
 // const PatientTimeline = require("../models/timelineModel");
-const Patient = require("../models/patientModel");
+const Patient = require("../../models/patientModel");
 const mongoose = require("mongoose");
 
 // get timeline information of a patient

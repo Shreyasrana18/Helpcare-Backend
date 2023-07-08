@@ -1,5 +1,5 @@
 const asyncHandler = require("express-async-handler");
-const User = require("../models/userModel");
+const User = require("../../models/userModel");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
@@ -7,8 +7,8 @@ const jwt = require("jsonwebtoken");
 // @desc    Register a new user
 // @route   POST /api/users/register
 const registerUser = asyncHandler(async (req, res) => {
-    const { username, email, password } = req.body;
-    if (!username || !email || !password) {
+    const { username, email, password, role } = req.body;
+    if (!username || !email || !password || !role) {
         res.status(400);
         throw new Error("Please fill all the fields");
     }
@@ -24,6 +24,7 @@ const registerUser = asyncHandler(async (req, res) => {
         username,
         email,
         password: hashedPassword,
+        role
     });
     console.log("User created: ", user);
     res.status(201).json(user);
