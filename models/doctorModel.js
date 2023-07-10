@@ -1,20 +1,25 @@
 const mongoose = require('mongoose');
 const doctorSchema = new mongoose.Schema({
-    userID: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-    },
     name: {
         type: String,
     },
-    specialization: {
+    specialities: {
         type: String,
     },
-    experience: {
-        type: Number,
+    email: {
+        type: String,
     },
     contact: {
         type: String,
+    },
+    username: {
+        type: String,
+        required: true,
+        unique: true,
+    },
+    password: {
+        type: String,
+        required: true,
     },
 
 });

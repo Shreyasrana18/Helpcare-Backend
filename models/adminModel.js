@@ -27,11 +27,11 @@ const adminSchema = new mongoose.Schema({
             type: String,
         }
     },
-    doctorInformation: {
-        type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Doctor' }], // array of doctor ids, refer to chatgpt search history
-        default: [],
-
-    },
+    doctorInformation: [
+        {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Doctor'
+    }],
     patientInformation: {
         name: {
             type: String,
