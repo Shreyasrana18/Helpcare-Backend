@@ -2,7 +2,7 @@ const asyncHandler = require("express-async-handler");
 const Admin = require("../../models/adminModel");
 const Doctor = require("../../models/doctorModel");
 const mongoose = require("mongoose");
-const ObjectId = require('mongodb').ObjectID;
+
 
 // get list of doctor information
 const doctorList = asyncHandler(async (req, res) => {

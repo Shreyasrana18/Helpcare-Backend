@@ -29,14 +29,13 @@ const adminSchema = new mongoose.Schema({
     },
     doctorInformation: [
         {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Doctor'
-    }],
-    patientInformation: {
-        name: {
-            type: String,
-        }
-    }
-
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Doctor'
+        }],
+    patientInformation: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Patient'
+        }]
 });
 module.exports = mongoose.model("Admin", adminSchema);
