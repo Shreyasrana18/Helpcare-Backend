@@ -2,6 +2,7 @@ const asyncHandler = require("express-async-handler");
 const Admin = require("../../models/adminModel");
 const Doctor = require("../../models/doctorModel");
 const mongoose = require("mongoose");
+const ObjectId = require('mongodb').ObjectID;
 
 // get list of doctor information
 const doctorList = asyncHandler(async (req, res) => {
@@ -50,25 +51,28 @@ const addDoctor = asyncHandler(async (req, res) => {
     res.status(201).json({ message: 'Doctor added to hospital successfully' });
 });
 
-const removeDoctor = async (hospitalId, doctorId) => {
-    try {
-      const hospital = await Admin.findByIdAndUpdate(
-        hospitalId,
-        { $pull: { doctorInformation: doctorId } },
-        { new: true }
-      );
-  
-      console.log(hospital.doctorInformation); // Updated doctorInformation array
-    } catch (error) {
-      console.error('Error removing doctor:', error);
-    }
-  };
 
 const removeDoctorDb = asyncHandler(async (req, res) => {
-    const { doctorID } = req.body;
-    const hospitalID = req.params.userID;
-    removeDoctor(hospitalID,doctorID);
-    res.status(201).json({ message: 'Doctor removed from hospital successfully' });
+    try {
+        const { doctorID } = req.body;
+        const hospital = await Admin.find({ userID: new mongoose.Types.ObjectId(req.params.userID) });
+        await Doctor.deleteOne({_id : doctorID});
+
+        const index = hospital[0].doctorInformation.indexOf(doctorID);
+        if (index !== -1) {
+            hospital[0].doctorInformation.pull(doctorID);
+            await hospital[0].save(); // remember to save the changes
+            console.log("Doctor ID successfully removed from the array.");
+
+        } else {
+            console.log("Doctor ID not found in the array.");
+        }
+        res.status(201).json({ message: 'Doctor removed from hospital successfully' });
+    } catch (error) {
+        console.error(error);
+    }
 });
+
+
 
 module.exports = { doctorList, addDoctor, removeDoctorDb }; 
