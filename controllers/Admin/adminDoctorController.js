@@ -1,6 +1,7 @@
 const asyncHandler = require("express-async-handler");
 const Admin = require("../../models/adminModel");
 const Doctor = require("../../models/doctorModel");
+const Patient = require("../../models/patientModel");
 const mongoose = require("mongoose");
 
 
@@ -51,12 +52,12 @@ const addDoctor = asyncHandler(async (req, res) => {
     res.status(201).json({ message: 'Doctor added to hospital successfully' });
 });
 
-
+// remove doctor information from the list
 const removeDoctorDb = asyncHandler(async (req, res) => {
     try {
         const { doctorID } = req.body;
         const hospital = await Admin.find({ userID: new mongoose.Types.ObjectId(req.params.userID) });
-        await Doctor.deleteOne({_id : doctorID});
+        await Doctor.deleteOne({ _id: doctorID });
 
         const index = hospital[0].doctorInformation.indexOf(doctorID);
         if (index !== -1) {
@@ -73,6 +74,20 @@ const removeDoctorDb = asyncHandler(async (req, res) => {
     }
 });
 
+// link patient to doctor
+const linkPatient = asyncHandler(async (req, res) => {
+    const { patientID, doctorID } = req.body;
+    const doctor = await Doctor.find({ _id: new mongoose.Types.ObjectId(doctorID) });
+    const patient = await Patient.find({ userID: new mongoose.Types.ObjectId(patientID) });
+    
+    if (!doctor && !patient) {
+        res.status(404);
+        throw new Error('Doctor or Patient not found');
+    }
+    doctor[0].patientID.push(patient[0]._id);
+    await doctor[0].save();
+    res.status(201).json({ message: 'Patient added to doctor successfully' });
 
+});
 
-module.exports = { doctorList, addDoctor, removeDoctorDb }; 
+module.exports = { doctorList, addDoctor, removeDoctorDb, linkPatient }; 

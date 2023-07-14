@@ -21,7 +21,11 @@ const doctorSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    patientID: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Patient',
+    }],
 
 });
 
-module.exports= mongoose.model('Doctor', doctorSchema);
+module.exports = mongoose.model('Doctor', doctorSchema);
