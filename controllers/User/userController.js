@@ -68,4 +68,21 @@ const currentUser = asyncHandler(async (req, res) => {
     res.status(201).json(req.user);
 });
 
-module.exports = { registerUser, loginUser, currentUser };
+// change password
+const changePassword = asyncHandler(async (req, res) => {
+    const filter = { userID: req.params.userID };
+    const update = {
+        $set: {
+            password: req.body.password,
+        },
+    };
+    const options = { new: true };
+    if (req.body.password != req.body.confirmpassword) {
+        res.status(401);
+        throw new Error('Password does not match');
+    }
+    const user = await User.findOneAndUpdate(filter, update, options);
+    res.status(201).json(user);
+});
+
+module.exports = { registerUser, loginUser, currentUser, changePassword };

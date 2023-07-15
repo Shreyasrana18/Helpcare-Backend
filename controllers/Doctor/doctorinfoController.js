@@ -4,11 +4,6 @@ const Doctor = require('../../models/doctorModel');
 // get list of doctor information
 const doctorList = asyncHandler(async (req, res) => {
     const doctorinfo = await Doctor.find({ _id: req.params.doctorID });
-    // check if the user is authorized to access the personal information
-    // if (doctorinfo[0].userID.valueOf().toString() != req.user.id) {
-    //     res.status(401);
-    //     throw new Error('User not authorized');
-    // }
     if (!doctorinfo) {
         res.status(404);
         throw new Error('Doctor not found');
@@ -19,10 +14,7 @@ const doctorList = asyncHandler(async (req, res) => {
 
 // update doctor information
 const updateDoctorinfo = asyncHandler(async (req, res) => {
-    // if (req.params.userID != req.user.id) {
-    //     res.status(401);
-    //     throw new Error('User not authorized');
-    // }
+    
     const filter = { _id: req.params.doctorID };
     const update = {
         $set: {
@@ -46,10 +38,6 @@ const updateDoctorinfo = asyncHandler(async (req, res) => {
 
 // delete doctor information
 const deleteDoctorinfo = asyncHandler(async (req, res) => {
-    // if (req.params.userID != req.user.id) {
-    //     res.status(401);
-    //     throw new Error('User not authorized');
-    // }
     const doctor = await Doctor.findById(req.params.doctorID);
     if (!doctor) {
         res.status(404);
@@ -59,4 +47,21 @@ const deleteDoctorinfo = asyncHandler(async (req, res) => {
     res.status(201).json({ message: 'Doctor removed' });
 });
 
-module.exports = { doctorList, updateDoctorinfo, deleteDoctorinfo };
+// change password
+const changePassword = asyncHandler(async (req, res) => {
+    const filter = { _id: req.params.doctorID };
+    const update = {
+        $set: {
+            password: req.body.password,
+        },
+    };
+    const options = { new: true };
+    if (req.body.password != req.body.confirmpassword) {
+        res.status(401);
+        throw new Error('Password does not match');
+    }
+    const doctor = await Doctor.findOneAndUpdate(filter, update, options);
+    res.status(201).json(doctor);
+});
+
+module.exports = { doctorList, updateDoctorinfo, deleteDoctorinfo , changePassword};

@@ -1,13 +1,14 @@
 const asyncHandler = require("express-async-handler");
 const Patient = require("../../models/patientModel");
 const mongoose = require("mongoose");
+const qrcode = require("qrcode");
 
 
 // get personal information of a patient
 const personalInfo = asyncHandler(async (req, res) => {
     const personalinfo = await Patient.find({ userID: new mongoose.Types.ObjectId(req.params.userID) });
     // check if the user is authorized to access the personal information
-    if(personalinfo[0].userID.valueOf().toString() != req.user.id){
+    if (personalinfo[0].userID.valueOf().toString() != req.user.id) {
         res.status(401);
         throw new Error("User not authorized");
     }
@@ -26,7 +27,7 @@ const createPersonalInfo = asyncHandler(async (req, res) => {
         res.status(404);
         throw new Error("Enter all required fields");
     }
-    if(userID != req.user.id){
+    if (userID != req.user.id) {
         res.status(401);
         throw new Error("User not authorized");
     }
@@ -52,7 +53,7 @@ const createPersonalInfo = asyncHandler(async (req, res) => {
 
 // update personal information of a patient
 const updatePersonalInfo = asyncHandler(async (req, res) => {
-    if(req.params.userID != req.user.id){
+    if (req.params.userID != req.user.id) {
         res.status(401);
         throw new Error("User not authorized");
     }
@@ -79,7 +80,7 @@ const updatePersonalInfo = asyncHandler(async (req, res) => {
 
 // delete personal information of a patient
 const deletePersonalInfo = asyncHandler(async (req, res) => {
-    if(req.params.userID != req.user.id){
+    if (req.params.userID != req.user.id) {
         res.status(401);
         throw new Error("User not authorized");
     }
@@ -95,7 +96,27 @@ const deletePersonalInfo = asyncHandler(async (req, res) => {
 
 });
 
+// generate QR code for a patient
+const generateQRcode = asyncHandler(async (req, res) => {
+    userID = req.params.userID;
+    if (req.params.userID != req.user.id) {
+        res.status(401);
+        throw new Error("User not authorized");
+    }
+    const qr = await qrcode.toDataURL(userID);
+    const filter = { userID: new mongoose.Types.ObjectId(userID) };
+    const update = {
+        $set: {
+            'qrcode': qr
+        }
+    };
+    const options = { new: true };
+    const patient = await Patient.findOneAndUpdate(filter, update, options);
+    res.status(200).json(patient['qrcode']);
+
+});
 
 
 
-module.exports = { personalInfo, createPersonalInfo, updatePersonalInfo, deletePersonalInfo };
+
+module.exports = { personalInfo, createPersonalInfo, updatePersonalInfo, deletePersonalInfo, generateQRcode };
