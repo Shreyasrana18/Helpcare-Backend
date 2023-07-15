@@ -19,7 +19,6 @@ const registerUser = asyncHandler(async (req, res) => {
     }
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
-    console.log("Hashed password: ", hashedPassword);
     const user = await User.create({
         username,
         email,
@@ -42,7 +41,7 @@ const loginUser = asyncHandler(async (req, res) => {
         res.status(400);
         throw new Error("User not registered");
     }
-    if (user && (await bcrypt.compare(password, user.password))) {
+    if (user && await bcrypt.compare(password, user.password)) {
         const accessToken = jwt.sign({
             user: {
                 username: user.username,
@@ -70,10 +69,15 @@ const currentUser = asyncHandler(async (req, res) => {
 
 // change password
 const changePassword = asyncHandler(async (req, res) => {
-    const filter = { userID: req.params.userID };
+    if(req.body.userID != req.user.id){
+        res.status(401);
+        throw new Error('User not authorized');
+    }
+    const hashedPassword = await bcrypt.hash(req.body.password, 10);
+    const filter = { _id: req.body.userID };
     const update = {
         $set: {
-            password: req.body.password,
+            password: hashedPassword,
         },
     };
     const options = { new: true };
@@ -83,6 +87,10 @@ const changePassword = asyncHandler(async (req, res) => {
     }
     const user = await User.findOneAndUpdate(filter, update, options);
     res.status(201).json(user);
+});
+
+// forgot password
+const forgotPassword = asyncHandler(async (req, res) => {
 });
 
 module.exports = { registerUser, loginUser, currentUser, changePassword };
