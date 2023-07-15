@@ -1,6 +1,7 @@
 const asyncHandler = require('express-async-handler');
-
+const Patient = require('../../models/patientModel');
 const Doctor = require('../../models/doctorModel');
+const mongoose = require('mongoose');
 
 // get patient list
 const patientListnames = asyncHandler(async (req, res) => {
@@ -27,20 +28,32 @@ const patientTimeHealthinfo = asyncHandler(async (req, res) => {
 
 // update patient timeline info 
 const updatePatientTimelineinfo = asyncHandler(async (req, res) => {
-    const filter = { _id: req.params.doctorID };
+    const doctor = await Doctor.find({ _id: req.params.doctorID }).populate('patientID');
+    const { userID, date, event, details, attachments } = req.body;
+    if (doctor[0].patientID[0].userID != userID) {
+        res.status(401);
+        throw new Error('Incorrect userID or doctor doesnt have access to this patient');
+    }
+    const filter = { userID: new mongoose.Types.ObjectId(userID) };
     const update = {
         $set: {
-            'patientID.timelineinfo': req.body.timelineinfo,
-        },
+            'timelineInformation.date': date,
+            'timelineInformation.event': event,
+            'timelineInformation.details': details,
+            'timelineInformation.attachments': attachments
+        }
     };
-    const doctor = await Doctor.findOneAndUpdate(filter, update, {
-        new: true,
-    });
+    const options = { new: true };
+    const patient = await Patient.findOneAndUpdate(filter, update, options);
+    if (!patient) {
+        res.status(404);
+        throw new Error("Patient not found");
+    }
     if (!doctor) {
         res.status(404);
         throw new Error('Doctor not found');
     }
-    res.status(201).json(doctor);
+    res.status(201).json(patient.timelineInformation);
 });
 
 module.exports = { patientListnames, patientTimeHealthinfo, updatePatientTimelineinfo };
