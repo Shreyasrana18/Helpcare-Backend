@@ -2,6 +2,7 @@ const asyncHandler = require("express-async-handler");
 const User = require("../../models/userModel");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const { generateResetToken, sendResetPasswordEmail } = require("../User/userfunctionController");
 
 
 // @desc    Register a new user
@@ -69,7 +70,7 @@ const currentUser = asyncHandler(async (req, res) => {
 
 // change password
 const changePassword = asyncHandler(async (req, res) => {
-    if(req.body.userID != req.user.id){
+    if (req.body.userID != req.user.id) {
         res.status(401);
         throw new Error('User not authorized');
     }
@@ -91,6 +92,40 @@ const changePassword = asyncHandler(async (req, res) => {
 
 // forgot password
 const forgotPassword = asyncHandler(async (req, res) => {
+    const resetToken = generateResetToken();
+    const user = await User.findOne({ email: req.body.email });
+    const resetTokenExpire = new Date();
+
+    resetTokenExpire.setHours(resetTokenExpire.getHours() + 1);
+
+    user.resetTokenExpire = resetTokenExpire;
+    user.resetToken = resetToken;
+
+    await user.save();
+    sendResetPasswordEmail(user.email, resetToken);
+    
+    res.status(200).json({ message: 'Reset password email sent.' });
 });
 
-module.exports = { registerUser, loginUser, currentUser, changePassword };
+
+// reset password
+const resetPassword = asyncHandler(async (req, res) => {
+    const { resetToken, newPassword } = req.body;
+    const user = await User.findOne({ resetToken });
+
+    if (!user) {
+        return res.status(400).json({ message: 'Invalid reset token.' });
+    }
+    if (user.resetTokenExpire < new Date()) {
+        return res.status(400).json({ message: 'Reset token has expired.' });
+    }
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    user.resetToken = undefined;
+    user.resetTokenExpire = undefined;
+    await user.save();
+
+    res.status(200).json({ message: 'Password reset successfully.' });
+});
+
+module.exports = { registerUser, loginUser, currentUser, changePassword, forgotPassword, resetPassword };

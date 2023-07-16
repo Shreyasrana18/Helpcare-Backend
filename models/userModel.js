@@ -19,7 +19,14 @@ const userSchema = new mongoose.Schema(
             enum: ['patient', 'admin', 'doctor'],
             default: 'patient',
             required: [true, "please add the role"],
-          }
+        },
+        resetToken: {
+            type: String,
+        },
+        resetTokenExpire: {
+            type: Date,
+        },
+
     },
     {
         timestamps: true,
