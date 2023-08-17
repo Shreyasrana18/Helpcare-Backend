@@ -16,14 +16,24 @@ const patientListnames = asyncHandler(async (req, res) => {
 // get patient timelineinfo and healthinfo
 const patientTimeHealthinfo = asyncHandler(async (req, res) => {
     const doctorinfo = await Doctor.find({ _id: req.params.doctorID }).populate('patientID');
+    // console.log(doctorinfo[0].patientID);
     if (!doctorinfo) {
         res.status(404);
         throw new Error('Doctor not found');
     }
-    res.status(201).json({
-        timelineInformation: doctorinfo[0].patientID[0].timelineInformation,
-        healthInformation: doctorinfo[0].patientID[0].healthInformation
-    });
+    const responseArray = [];
+    for (const patient of doctorinfo[0].patientID) {
+        const patientData = {
+            patientName: patient.patientPersonalInformation.name,
+            healthInformation: patient.healthInformation,
+            timelineInformation: patient.timelineInformation
+        };
+        responseArray.push(patientData);
+    }
+
+    res.status(201).json(
+        responseArray
+    );
 });
 
 // update patient timeline info 

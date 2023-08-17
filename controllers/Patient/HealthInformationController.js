@@ -26,6 +26,7 @@ const updateHealthInfo = asyncHandler(async (req, res) => {
         res.status(401);
         throw new Error("User not authorized");
     }
+    const bmi = (req.body.weight / (req.body.height * req.body.height)).toFixed(2);
     const filter = { userID: new mongoose.Types.ObjectId(req.params.userID) };
     const update = {
         $set: {
@@ -33,7 +34,7 @@ const updateHealthInfo = asyncHandler(async (req, res) => {
             'healthInformation.height': req.body.height,
             'healthInformation.weight': req.body.weight,
             'healthInformation.allergies': req.body.allergies,
-            'healthInformation.bmi': req.body.bmi
+            'healthInformation.bmi': bmi
         }
     };
     const options = { new: true };

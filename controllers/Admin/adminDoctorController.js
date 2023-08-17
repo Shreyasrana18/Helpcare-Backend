@@ -79,15 +79,21 @@ const linkPatient = asyncHandler(async (req, res) => {
     const { patientID, doctorID } = req.body;
     const doctor = await Doctor.find({ _id: new mongoose.Types.ObjectId(doctorID) });
     const patient = await Patient.find({ userID: new mongoose.Types.ObjectId(patientID) });
-    
-    if (!doctor && !patient) {
+    if (!doctor || !patient) {
         res.status(404);
         throw new Error('Doctor or Patient not found');
     }
-    doctor[0].patientID.push(patient[0]._id);
-    await doctor[0].save();
-    res.status(201).json({ message: 'Patient added to doctor successfully' });
+    if (doctor[0].patientID.includes(patient[0]._id)) {
+        res.status(200).json({ message: 'Patient already linked to doctor' });
+    }
+    else {
+        doctor[0].patientID.push(patient[0]._id);
+        await doctor[0].save();
+        res.status(201).json({ message: 'Patient added to doctor successfully' });
+    }
 
 });
+
+
 
 module.exports = { doctorList, addDoctor, removeDoctorDb, linkPatient }; 

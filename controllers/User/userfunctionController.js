@@ -8,15 +8,18 @@ const generateResetToken = () => {
 
 const sendResetPasswordEmail = async (email, resetToken) => {
     const transporter = nodemailer.createTransport({
-        service: 'gmail',
+        host: 'smtp.mail.yahoo.com',
+        port: 465,
+        service:'yahoo',
+        secure: false,
         auth: {
-            user: 'capstonehelpcare@gmail.com',
-            pass: 'helpcare@admin'
+            user: 'capstonehelpcare',
+            pass: 'capstone@admin'
         }
     });
 
     const mailOptions = {
-        from: 'capstonehelpcare@gmail.com',
+        from: 'capstonehelpcare@yahoo.com',
         to: email,
         subject: 'Password Reset',
         text: `Click the following link to reset your password: ${resetToken}`
