@@ -13,8 +13,8 @@ const sendResetPasswordEmail = async (email, resetToken) => {
         service:'yahoo',
         secure: false,
         auth: {
-            user: 'capstonehelpcare',
-            pass: 'capstone@admin'
+            user: process.env.username,
+            pass: process.env.password
         }
     });
 
