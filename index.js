@@ -13,6 +13,7 @@ app.use("/api/users/", require("./routes/userRoutes"));
 app.use("/api/patient/", require("./routes/patientRoutes"));
 app.use("/api/doctor/", require("./routes/doctorRoutes"));
 app.use("/api/admin/", require("./routes/adminRoutes"));
+app.use("/api/diagnostic/", require("./routes/diagnosticRoutes"));
 app.use(errorHandler);
 
 app.listen(port, () => {

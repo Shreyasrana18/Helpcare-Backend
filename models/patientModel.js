@@ -58,9 +58,14 @@ const patientSchema = mongoose.Schema({
             type: String,
         }],
     },
-    qrcode : {
+    qrcode: {
         type: String,
     },
+    report: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Report',
+    }],
+
 },
     {
         timestamps: true,
