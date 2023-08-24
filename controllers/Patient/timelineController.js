@@ -101,12 +101,12 @@ const removeReport = asyncHandler(async (req, res) => {
 
 
 const getReport = asyncHandler(async (req,res ) => {
-    const patient = Patient.find({userID: new mongoose.Types.ObjectId(req.params.userID)}).populate('report');
-    res.status(201).json(patient.report);
+    const patient = await Patient.find({userID: new mongoose.Types.ObjectId(req.params.userID)}).populate('report');
+    res.status(201).json(patient[0].report);
 });
 
 const getTimeline = asyncHandler(async (req,res ) => {
-    const patient = Patient.find({userID: new mongoose.Types.ObjectId(req.params.userID)}).populate('timeline');
-    res.status(201).json(patient.timeline);
+    const patient = await Patient.find({userID: new mongoose.Types.ObjectId(req.params.userID)}).populate('timeline');
+    res.status(201).json(patient[0].timeline);
 });
 module.exports = { timelineInfo, updateTimelineInfo, deleteTimelineInfo,removeTimeline,removeReport,getTimeline, getReport }; 

@@ -17,23 +17,19 @@ const patientListnames = asyncHandler(async (req, res) => {
 // get patient timelineinfo and healthinfo
 const patientTimeHealthinfo = asyncHandler(async (req, res) => {
     const doctorinfo = await Doctor.find({ _id: req.params.doctorID }).populate('patientID');
-    // console.log(doctorinfo[0].patientID);
+    
     if (!doctorinfo) {
         res.status(404);
         throw new Error('Doctor not found');
     }
     const responseArray = [];
     for (const patient of doctorinfo[0].patientID) {
-        const patientData = {
-            patientName: patient.patientPersonalInformation.name,
-            healthInformation: patient.healthInformation,
-            timeline: patient.timeline
-        };
+        const patientData = await Patient.find({ _id: patient._id }).populate('timeline');
         responseArray.push(patientData);
     }
 
     res.status(201).json(
-        responseArray
+        responseArray[0]
     );
 });
 
@@ -79,9 +75,10 @@ const addTimelineinfo = asyncHandler(async (req, res) => {
         description: req.body.description,
         attachments: req.body.attachments
     });
+    console.log(addtimeline, patient)
     try{
         await addtimeline.save();
-        await patient[0].timeline.push(addtimeline._id);
+        patient[0].timeline.push(addtimeline._id);
         await patient[0].save();
     }catch(err)
     {
