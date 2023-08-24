@@ -16,14 +16,13 @@ const personalInfo = asyncHandler(async (req, res) => {
         res.status(404);
         throw new Error("Patient not found");
     }
-    console.log(personalinfo[0].userID.valueOf().toString(), req.user.id);
-    res.status(201).json(personalinfo[0].patientPersonalInformation);
+    res.status(201).json(personalinfo[0]);
 });
 
 // create personal information of a patient
 const createPersonalInfo = asyncHandler(async (req, res) => {
-    const { userID, name, age, gender, address, email, contact, emergencycontact } = req.body;
-    if (!name || !age || !gender || !address || !email || !contact) {
+    const { userID } = req.body;
+    if (!userID) {
         res.status(404);
         throw new Error("Enter all required fields");
     }
@@ -33,15 +32,6 @@ const createPersonalInfo = asyncHandler(async (req, res) => {
     }
     const patient = new Patient({
         userID: userID,
-        patientPersonalInformation: {
-            name: name,
-            age: age,
-            gender: gender,
-            address: address,
-            email: email,
-            contact: contact,
-            emergencycontact: emergencycontact
-        }
     });
     try {
         await patient.save();
@@ -116,7 +106,14 @@ const generateQRcode = asyncHandler(async (req, res) => {
 
 });
 
-
+const getreport = asyncHandler(async (req, res) => {
+    const patientreport = await Patient.find({ userID: new mongoose.Types.ObjectId(req.params.userID) }).populate('reportID');
+    if (!report) {
+        res.status(404);
+        throw new Error("Report not found");
+    }
+    res.status(201).json(patientreport.report);
+});
 
 
 module.exports = { personalInfo, createPersonalInfo, updatePersonalInfo, deletePersonalInfo, generateQRcode };

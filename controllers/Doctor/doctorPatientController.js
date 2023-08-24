@@ -1,6 +1,7 @@
 const asyncHandler = require('express-async-handler');
 const Patient = require('../../models/patientModel');
 const Doctor = require('../../models/doctorModel');
+const Timeline = require('../../models/timelineModel');
 const mongoose = require('mongoose');
 
 // get patient list
@@ -26,7 +27,7 @@ const patientTimeHealthinfo = asyncHandler(async (req, res) => {
         const patientData = {
             patientName: patient.patientPersonalInformation.name,
             healthInformation: patient.healthInformation,
-            timelineInformation: patient.timelineInformation
+            timeline: patient.timeline
         };
         responseArray.push(patientData);
     }
@@ -66,4 +67,27 @@ const updatePatientTimelineinfo = asyncHandler(async (req, res) => {
     res.status(201).json(patient.timelineInformation);
 });
 
-module.exports = { patientListnames, patientTimeHealthinfo, updatePatientTimelineinfo };
+const addTimelineinfo = asyncHandler(async (req, res) => {
+    const patient = await Patient.find({ userID: new mongoose.Types.ObjectId(req.body.patientID) });
+    if(!patient) {
+        res.status(404);
+        throw new Error('Patient not found');
+    }
+    const addtimeline = new Timeline({
+        date: req.body.date,
+        event: req.body.event,
+        description: req.body.description,
+        attachments: req.body.attachments
+    });
+    try{
+        await addtimeline.save();
+        await patient[0].timeline.push(addtimeline._id);
+        await patient[0].save();
+    }catch(err)
+    {
+        console.error('Error saving timeline:', err);
+    }
+    res.status(201).json(addtimeline);
+});
+
+module.exports = { patientListnames, patientTimeHealthinfo, updatePatientTimelineinfo,addTimelineinfo };

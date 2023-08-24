@@ -1,6 +1,8 @@
 const asyncHandler = require("express-async-handler");
 // const PatientTimeline = require("../models/timelineModel");
 const Patient = require("../../models/patientModel");
+const Timeline = require("../../models/timelineModel");
+const Report = require("../../models/reportModel");
 const mongoose = require("mongoose");
 
 // get timeline information of a patient
@@ -17,6 +19,7 @@ const timelineInfo = asyncHandler(async (req, res) => {
     }
     res.status(201).json(timelineinfo[0].timelineInformation);
 });
+
 
 
 // update timeline information of a patient
@@ -60,4 +63,50 @@ const deleteTimelineInfo = asyncHandler(async (req, res) => {
     res.status(200).json({ message: "Health Timeline removed" });
 });
 
-module.exports = { timelineInfo, updateTimelineInfo, deleteTimelineInfo }; 
+// remove particular timeline info
+const removeTimeline = asyncHandler(async (req, res) => {
+    const patient = await Patient.find({ userID: new mongoose.Types.ObjectId(req.params.userID) });
+    const index = patient[0].timeline.findIndex(req.body.timelineID);
+    if(index !== -1 )
+    {
+        patient[0].timeline.pull(req.body.timelineID);
+        await patient[0].save();
+        await Timeline.deleteOne({_id: req.body.timelineID});
+    }
+    else
+    {
+        console.log("Timeline id not found");
+    }
+    res.status(200).json({ message: "Timeline removed" });
+    
+});
+
+
+// remove report
+const removeReport = asyncHandler(async (req, res) => {
+    const patient = await Patient.find({userID : new mongoose.Types.ObjectId(req.params.userID)});  
+    const index = patient[0].report.findIndex(req.body.reportID);
+    if(index !== -1)
+    {
+        patient[0].report.pull(req.body.reportID);
+        await patient[0].save();
+        await Report.deleteOne({_id: req.body.reportID});
+    }
+    else
+    {
+        console.log("Report id not found");
+    }
+    res.status(200).json({ message: "Report removed" });
+});
+
+
+const getReport = asyncHandler(async (req,res ) => {
+    const patient = Patient.find({userID: new mongoose.Types.ObjectId(req.params.userID)}).populate('report');
+    res.status(201).json(patient.report);
+});
+
+const getTimeline = asyncHandler(async (req,res ) => {
+    const patient = Patient.find({userID: new mongoose.Types.ObjectId(req.params.userID)}).populate('timeline');
+    res.status(201).json(patient.timeline);
+});
+module.exports = { timelineInfo, updateTimelineInfo, deleteTimelineInfo,removeTimeline,removeReport,getTimeline, getReport }; 

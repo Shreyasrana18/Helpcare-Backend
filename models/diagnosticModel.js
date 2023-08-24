@@ -19,7 +19,8 @@ const diagnosticSchema = new mongoose.Schema({
     },
     diagnosticReport : [
         {
-            type: String,
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Report',
         }
     ],
     patientID: [{

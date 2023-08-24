@@ -10,12 +10,12 @@ const getInformation = asyncHandler(async (req,res ) => {
         res.status(401);
         throw new Error('User not authorized');
     }
-    const information = await Diagnostic.find({userID: new mongoose.Types.ObjectId(req.params.userID)});
+    const information = await Diagnostic.find({userID: new mongoose.Types.ObjectId(req.params.userID)}).populate('diagnosticReport');
     if(!information){
         res.status(404);
         throw new Error('Report not found');
     }
-    res.status(201).json(information);
+    res.status(201).json(information[0]);
 });
 
 const updateInformation = asyncHandler(async (req,res ) => {
@@ -58,7 +58,7 @@ const creatediagnosticID = asyncHandler(async (req,res ) => {
     res.status(201).json(diagnostic);
 });
 
-const getReport = asyncHandler(async (req,res ) => {
+const getReportDiagnostic = asyncHandler(async (req,res ) => {
     if(req.params.userID != req.user.id){
         res.status(401);
         throw new Error('User not authorized');
@@ -80,16 +80,24 @@ const addreport = asyncHandler(async (req,res ) => {
     });
     const diagnostic = await Diagnostic.find({userID: new mongoose.Types.ObjectId(req.params.userID)});
     const patient = await Patient.find({userID: new mongoose.Types.ObjectId(req.body.patientID)});
+
+    if(!diagnostic[0].patientID.includes(patient[0]._id)){
+        diagnostic[0].patientID.push(patient[0]._id);
+    }
     if(!patient){
         res.status(404);
         throw new Error('Patient not found');
     }
     try{
         await report.save();
-        await diagnostic.diagnosticReport.push(report._id);
+        diagnostic[0].diagnosticReport.push(report._id);
+        patient[0].report.push(report._id);
+        await diagnostic[0].save();
+        await patient[0].save();
     }catch(error){
         console.error('Error saving report:',error);
     }
+    res.status(201).json(report);
 });
 
-module.exports = {getInformation, updateInformation, creatediagnosticID, getReport};
+module.exports = {getInformation, updateInformation, creatediagnosticID, getReportDiagnostic, addreport};
