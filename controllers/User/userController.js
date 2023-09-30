@@ -53,7 +53,6 @@ const loginUser = asyncHandler(async (req, res) => {
             { expiresIn: "60m" } // Remember to change expiry time
         );
         res.status(200).json({ accessToken });
-        res.json({ message: "User Logged In" });
     }
     else {
         res.status(400);

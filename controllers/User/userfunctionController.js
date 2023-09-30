@@ -6,33 +6,37 @@ const generateResetToken = () => {
     return resetToken;
 };
 
-const sendResetPasswordEmail = async (email, resetToken) => {
-    const transporter = nodemailer.createTransport({
-        host: 'smtp.mail.yahoo.com',
-        port: 465,
-        service:'yahoo',
-        secure: false,
-        auth: {
-            user: process.env.username,
-            pass: process.env.password
-        }
-    });
+const sendResetPasswordEmail = (email, resetToken) => {
+    try {
+        const transporter = nodemailer.createTransport({
+            host: 'smtp.gmail.com',
+            port: 465,
+            secure: false,
+            ssl : true,
+            auth: {
+                user: process.env.username,
+                pass: process.env.password
+            }
+        });
 
-    const mailOptions = {
-        from: 'capstonehelpcare@yahoo.com',
-        to: email,
-        subject: 'Password Reset',
-        text: `Click the following link to reset your password: ${resetToken}`
-    };
+        const mailOptions = {
+            from: 'capstonehelpcare@gmail.com',
+            to: email,
+            subject: 'Password Reset',
+            text: `Click the following link to reset your password: ${resetToken}`
+        };
 
-    transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-            console.error('Error sending email:', error);
-        } else {
-            console.log('Email sent:', info.response);
-        }
-    });
-    console.log(resetToken);
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                console.error('Error sending email:', error);
+            } else {
+                console.log('Email sent:', info.response);
+            }
+        });
+        console.log(resetToken);
+    } catch (error) {
+        console.error('Error creating transporter:', error);
+    }
 };
 
 module.exports = { generateResetToken, sendResetPasswordEmail };
