@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
+const smtpTransport = require('nodemailer-smtp-transport');
 
 const generateResetToken = () => {
     const resetToken = crypto.randomBytes(20).toString('hex');
@@ -7,17 +8,18 @@ const generateResetToken = () => {
 };
 
 const sendResetPasswordEmail = (email, resetToken) => {
+    console.log(process.env.username);
+    console.log(process.env.password);
     try {
-        const transporter = nodemailer.createTransport({
-            host: 'smtp.gmail.com',
-            port: 465,
-            secure: false,
-            ssl : true,
+        const transporter = nodemailer.createTransport(
+            {
+            service: 'Gmail',
             auth: {
-                user: process.env.username,
+                user: 'capstonehelpcare@gmail.com',
                 pass: process.env.password
             }
-        });
+        }
+        );
 
         const mailOptions = {
             from: 'capstonehelpcare@gmail.com',
