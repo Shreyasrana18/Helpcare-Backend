@@ -44,20 +44,6 @@ const patientSchema = mongoose.Schema({
             type: String,
         },
     },
-    timelineInformation: {
-        date: {
-            type: Date,
-        },
-        event: {
-            type: String,
-        },
-        details: {
-            type: String,
-        },
-        attachments: [{
-            type: String,
-        }],
-    },
     qrcode: {
         type: String,
     },

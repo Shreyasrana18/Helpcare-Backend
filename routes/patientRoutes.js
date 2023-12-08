@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-const { personalInfo, createPersonalInfo, updatePersonalInfo, deletePersonalInfo, generateQRcode } = require('../controllers/Patient/patientController');
+const { personalInfo,updatePersonalInfo, deletePersonalInfo, generateQRcode } = require('../controllers/Patient/patientController');
 const { healthinfo, updateHealthInfo, deleteHealthInfo } = require('../controllers/Patient/HealthInformationController');
 const { timelineInfo, updateTimelineInfo, deleteTimelineInfo, removeTimeline, removeReport, getTimeline,getReport } = require('../controllers/Patient/timelineController');
 const validateToken = require('../middleware/validateTokenHandler');
@@ -14,7 +14,6 @@ router.route('/healthinfo/:userID').get(healthinfo).put(updateHealthInfo).delete
 
 // Routes for personal information of patient
 router.route('/personalinfo/:userID').get(personalInfo).put(updatePersonalInfo).delete(deletePersonalInfo);
-router.route('/personalinfo').post(createPersonalInfo);
 router.route('/getqr/:userID').get(generateQRcode);
 
 // Routes for timeline information of patient

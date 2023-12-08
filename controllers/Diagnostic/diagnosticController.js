@@ -42,21 +42,21 @@ const updateInformation = asyncHandler(async (req,res ) => {
 
 });
 
-const creatediagnosticID = asyncHandler(async (req,res ) => {
-    if(req.params.userID != req.user.id){
-        res.status(401);
-        throw new Error('User not authorized');
+const creatediagnosticID =async (userID) => {
+    if(!userID){
+        res.status(404);
+        throw new Error('Enter userID');
     }
     const diagnostic = new Diagnostic({
-        userID: req.params.userID,
+        userID: userID,
     });
     try{
         await diagnostic.save();
     }catch(error){
         console.error('Error saving diagnostic:',error);
     }
-    res.status(201).json(diagnostic);
-});
+    return diagnostic;
+};
 
 const getReportDiagnostic = asyncHandler(async (req,res ) => {
     if(req.params.userID != req.user.id){

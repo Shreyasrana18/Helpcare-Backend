@@ -20,26 +20,24 @@ const personalInfo = asyncHandler(async (req, res) => {
 });
 
 // create personal information of a patient
-const createPersonalInfo = asyncHandler(async (req, res) => {
-    const { userID } = req.body;
+const createPersonalInfo = async (userID) => {
     if (!userID) {
-        res.status(404);
         throw new Error("Enter all required fields");
     }
-    if (userID != req.user.id) {
-        res.status(401);
-        throw new Error("User not authorized");
-    }
+
     const patient = new Patient({
         userID: userID,
     });
+
     try {
         await patient.save();
     } catch (error) {
         console.error('Error saving patient:', error);
+        throw new Error('Error saving patient');
     }
-    res.status(201).json(patient['patientPersonalInformation']);
-});
+
+    return patient['patientPersonalInformation'];
+};
 
 // update personal information of a patient
 const updatePersonalInfo = asyncHandler(async (req, res) => {

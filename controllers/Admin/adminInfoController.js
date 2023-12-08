@@ -19,15 +19,10 @@ const adminInfo = asyncHandler(async (req, res) => {
 });
 
 // create admin id
-const createAdminID = asyncHandler(async (req, res) => {
-    const { userID } = req.body;
+const createAdminID = async (userID) => {
     if (!userID) {
         res.status(404);
         throw new Error("Enter all required fields");
-    }
-    if (userID != req.user.id) {
-        res.status(401);
-        throw new Error("User not authorized");
     }
     const admin = new Admin({
         userID: userID
@@ -37,8 +32,8 @@ const createAdminID = asyncHandler(async (req, res) => {
     } catch (error) {
         console.error('Error saving admin:', error);
     }
-    res.status(201).json(admin['hospitalInformation']);
-});
+    return admin['hospitalInformation'];
+};
 
 // update information of admin
 const updateAdmininfo = asyncHandler(async (req, res) => {

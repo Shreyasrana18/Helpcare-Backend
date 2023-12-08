@@ -3,7 +3,9 @@ const User = require("../../models/userModel");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { generateResetToken, sendResetPasswordEmail } = require("../User/userfunctionController");
-
+const { createPersonalInfo } = require("../Patient/patientController");
+const { createAdminID } = require("../Admin/adminInfoController");
+const { creatediagnosticID } = require("../Diagnostic/diagnosticController");
 
 // @desc    Register a new user
 // @route   POST /api/users/register
@@ -26,6 +28,30 @@ const registerUser = asyncHandler(async (req, res) => {
         password: hashedPassword,
         role
     });
+    if (role == 'patient') {
+        try {
+            await createPersonalInfo(user._id);
+        } catch (error) {
+            // Handle errors
+            console.error('Error creating personal information:', error.message);
+        }
+    }
+    else if (role == 'admin') {
+        try {
+            await createAdminID(user._id);
+        } catch (error) {
+            // Handle errors
+            console.error('Error creating hosptal information:', error.message);
+        }
+    }
+    else if (role == 'diagnostic') {
+        try {
+            await creatediagnosticID(user._id);
+        } catch (error) {
+            // Handle errors
+            console.error('Error creating Diagnositc center information:', error.message);
+        }
+    }
     res.status(201).json(user);
 });
 
@@ -52,13 +78,15 @@ const loginUser = asyncHandler(async (req, res) => {
         }, process.env.ACCESS_TOKEN_SECRET,
             { expiresIn: "60m" } // Remember to change expiry time
         );
-        res.status(200).json({ accessToken,
+        res.status(200).json({
+            accessToken,
             user: {
                 username: user.username,
+                role: user.role,
                 email: user.email,
                 id: user._id
             },
-         });
+        });
     }
     else {
         res.status(400);
@@ -108,7 +136,7 @@ const forgotPassword = asyncHandler(async (req, res) => {
 
     await user.save();
     sendResetPasswordEmail(user.email, resetToken);
-    
+
     res.status(200).json({ message: 'Reset password email sent.' });
 });
 
