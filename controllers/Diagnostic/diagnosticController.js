@@ -72,15 +72,9 @@ const addreport = asyncHandler(async (req,res ) => {
         res.status(401);
         throw new Error('User not authorized');
     }
-    const report = new Report({
-        date: req.body.date,
-        event: req.body.event,
-        description: req.body.description,
-        attachments: req.body.attachments
-    });
     const diagnostic = await Diagnostic.find({userID: new mongoose.Types.ObjectId(req.params.userID)});
     const patient = await Patient.find({userID: new mongoose.Types.ObjectId(req.body.patientID)});
-
+    
     if(!patient){
         res.status(404);
         throw new Error('Patient not found');
@@ -89,7 +83,14 @@ const addreport = asyncHandler(async (req,res ) => {
         res.status(404);
         throw new Error('Patient not active');
     }
-    
+    const report = new Report({
+        date: req.body.date,
+        event: req.body.event,
+        description: req.body.description,
+        attachments: req.body.attachments,
+        diagnosticCenterName: diagnostic[0].name,
+    });
+
     if(!diagnostic[0].patientID.includes(patient[0]._id)){
         diagnostic[0].patientID.push(patient[0]._id);
     }

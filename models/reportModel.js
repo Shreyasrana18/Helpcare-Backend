@@ -16,7 +16,10 @@ const reportSchema = new mongoose.Schema({
     attachments : [{
         type: String,
         required: true
-    }]
+    }],
+    diagnosticCenterName : {
+        type: String,
+    }
 });
 
 module.exports = mongoose.model('Report', reportSchema);

@@ -22,19 +22,20 @@ const patientTimeHealthinfo = asyncHandler(async (req, res) => {
         res.status(404);
         throw new Error('Doctor not found');
     }
-    const responseArray = [];
+
+    let responseArray = [];
     for (const patient of doctorinfo[0].patientID) {
         const patientData = await Patient.find({ _id: patient._id }).populate('timeline');
-        responseArray.push(patientData);
+        responseArray = responseArray.concat(patientData); // array of objects - instead of using push{ it makes it an array of arrays{ harder to retrieve information}}
     }
 
-    res.status(201).json(
-        responseArray[0]
-    );
+    res.status(201).json(responseArray);
 });
+
 
 const addTimelineinfo = asyncHandler(async (req, res) => {
     const patient = await Patient.find({ userID: new mongoose.Types.ObjectId(req.body.patientID) });
+    const doctor = await Doctor.find({ _id: req.params.doctorID });
     if (!patient) {
         res.status(404);
         throw new Error('Patient not found');
@@ -47,9 +48,10 @@ const addTimelineinfo = asyncHandler(async (req, res) => {
         date: req.body.date,
         event: req.body.event,
         description: req.body.description,
-        attachments: req.body.attachments
+        attachments: req.body.attachments,
+        doctorName: doctor[0].name,
     });
-    console.log(addtimeline, patient)
+    
     try {
         await addtimeline.save();
         patient[0].timeline.push(addtimeline._id);

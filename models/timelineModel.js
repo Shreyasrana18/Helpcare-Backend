@@ -13,6 +13,9 @@ const timelineSchema = new mongoose.Schema({
     attachments: [{
         type: String,
     }],
+    doctorName: {
+        type: String,
+    }
 });
 
 module.exports = mongoose.model('Timeline', timelineSchema);

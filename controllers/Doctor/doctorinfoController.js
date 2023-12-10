@@ -36,6 +36,24 @@ const updateDoctorinfo = asyncHandler(async (req, res) => {
     res.status(201).json(doctor);
 });
 
+const loginDoctor = asyncHandler(async (req, res) => {
+    const {username, password} = req.body;
+    if(!username || !password){
+        res.status(404);
+        throw new Error('Enter username and password');
+    }
+    const doctor = await Doctor.findOne({username: username});
+    if(!doctor){
+        res.status(404);
+        throw new Error('Doctor not found');
+    }
+    if(doctor.password != password){
+        res.status(401);
+        throw new Error('Password is incorrect');
+    }
+    res.status(201).json(doctor);
+});
+
 // delete doctor information
 const deleteDoctorinfo = asyncHandler(async (req, res) => {
     const doctor = await Doctor.findById(req.params.doctorID);
@@ -64,4 +82,4 @@ const changePassword = asyncHandler(async (req, res) => {
     res.status(201).json(doctor);
 });
 
-module.exports = { doctorList, updateDoctorinfo, deleteDoctorinfo , changePassword};
+module.exports = { loginDoctor, doctorList, updateDoctorinfo, deleteDoctorinfo , changePassword};
