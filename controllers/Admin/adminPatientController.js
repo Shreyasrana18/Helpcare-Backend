@@ -18,10 +18,34 @@ const patientList = asyncHandler(async (req, res) => {
     res.status(201).json(admininfo[0].patientInformation);
 });
 
+const activepatientList = asyncHandler(async (req, res) => {
+    const admininfo = await Admin
+        .find({ userID: new mongoose.Types.ObjectId(req.params.userID) })
+        .populate({
+            path: 'patientInformation',
+            match: { activeflag: true } // Add this condition to filter patients with activeflag = true
+        });
+    // check if the user is authorized to access the personal information
+    if (admininfo[0].userID.valueOf().toString() != req.user.id) {
+        res.status(401);
+        throw new Error("User not authorized");
+    }
+    if (!admininfo) {
+        res.status(404);
+        throw new Error("Admin not found");
+    }
+    res.status(201).json(admininfo[0].patientInformation);
+});
+
 const addPatient = asyncHandler(async (req, res) => {
     const { userID } = req.body;
     const hospital = await Admin.find({ userID: new mongoose.Types.ObjectId(req.params.userID) });
+
     const patient = await Patient.find({ userID: new mongoose.Types.ObjectId(userID) });
+    if (hospital[0].userID.valueOf().toString() != req.user.id) {
+        res.status(401);
+        throw new Error("User not authorized");
+    }
     if (!hospital) {
         res.status(404);
         throw new Error('Hospital not found');
@@ -30,12 +54,23 @@ const addPatient = asyncHandler(async (req, res) => {
         res.status(404);
         throw new Error('Patient not found');
     }
-    hospital[0].patientInformation.push(patient[0]._id);
-    await hospital[0].save();
-    res.status(201).json({ message: 'Patient added to hospital successfully' });
+
+    if (hospital[0].patientInformation.indexOf(userID)) {
+        res.status(201).json({ message: 'Patient already exists' });
+    }
+    else {
+        hospital[0].patientInformation.push(patient[0]._id);
+        await hospital[0].save();
+    }
+    res.status(201).json({ patient });
 });
 
 const removePatientDb = asyncHandler(async (req, res) => {
+
+    if (req.params.userID != req.user.id) {
+        res.status(401);
+        throw new error("User not authorised");
+    }
     try {
         const { patientID } = req.body;
         const patient = await Patient.find({ userID: new mongoose.Types.ObjectId(patientID) });
@@ -55,4 +90,6 @@ const removePatientDb = asyncHandler(async (req, res) => {
     }
 });
 
-module.exports = { patientList, addPatient, removePatientDb };
+
+
+module.exports = { activepatientList, patientList, addPatient, removePatientDb };

@@ -81,12 +81,17 @@ const addreport = asyncHandler(async (req,res ) => {
     const diagnostic = await Diagnostic.find({userID: new mongoose.Types.ObjectId(req.params.userID)});
     const patient = await Patient.find({userID: new mongoose.Types.ObjectId(req.body.patientID)});
 
-    if(!diagnostic[0].patientID.includes(patient[0]._id)){
-        diagnostic[0].patientID.push(patient[0]._id);
-    }
     if(!patient){
         res.status(404);
         throw new Error('Patient not found');
+    }
+    if(patient[0].activeFlag == false){
+        res.status(404);
+        throw new Error('Patient not active');
+    }
+    
+    if(!diagnostic[0].patientID.includes(patient[0]._id)){
+        diagnostic[0].patientID.push(patient[0]._id);
     }
     try{
         await report.save();

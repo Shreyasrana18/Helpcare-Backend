@@ -30,13 +30,13 @@ const addDoctor = asyncHandler(async (req, res) => {
         res.status(404);
         throw new Error('Hospital not found');
     }
-    let doctor = await Doctor.findOne({ email });
+    const doctors = await Doctor.findOne({ username: username});
 
-    if (doctor) {
-        hospital[0].doctorInformation.push(doctor._id);
+    if (doctors) {
+        res.status(201).json({ message: 'Doctor already exists' });
     } else {
         console.log("create");
-        doctor = new Doctor({
+        const doctor = new Doctor({
             name: name,
             specialities: specialities,
             contact: contact,
@@ -44,8 +44,11 @@ const addDoctor = asyncHandler(async (req, res) => {
             username: username,
             password: password,
         });
+        console.log(doctor);
         await doctor.save();
+        console.log("test1");
         hospital[0].doctorInformation.push(doctor._id);
+        await hospital[0].save();
     }
 
     await hospital[0].save();
@@ -91,7 +94,8 @@ const linkPatient = asyncHandler(async (req, res) => {
         await doctor[0].save();
         res.status(201).json({ message: 'Patient added to doctor successfully' });
     }
-
+    patient[0].activeFlag = true;
+    await patient[0].save();
 });
 
 

@@ -9,7 +9,7 @@ const doctorList = asyncHandler(async (req, res) => {
         throw new Error('Doctor not found');
     }
 
-    res.status(201).json(doctorinfo[0].doctorInformation);
+    res.status(201).json(doctorinfo[0]);
 });
 
 // update doctor information

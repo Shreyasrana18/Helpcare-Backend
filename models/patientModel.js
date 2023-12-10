@@ -53,13 +53,20 @@ const patientSchema = mongoose.Schema({
             ref: 'Report',
         }
     ],
+    activeflag: {
+        type: Boolean,
+        default: false,
+    },
+    doctorID: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Doctor',
+    }],
     timeline: [
         {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Timeline',
         }
     ]
-
 },
     {
         timestamps: true,

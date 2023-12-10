@@ -17,7 +17,7 @@ const patientListnames = asyncHandler(async (req, res) => {
 // get patient timelineinfo and healthinfo
 const patientTimeHealthinfo = asyncHandler(async (req, res) => {
     const doctorinfo = await Doctor.find({ _id: req.params.doctorID }).populate('patientID');
-    
+
     if (!doctorinfo) {
         res.status(404);
         throw new Error('Doctor not found');
@@ -33,41 +33,15 @@ const patientTimeHealthinfo = asyncHandler(async (req, res) => {
     );
 });
 
-// update patient timeline info 
-const updatePatientTimelineinfo = asyncHandler(async (req, res) => {
-    const doctor = await Doctor.find({ _id: req.params.doctorID }).populate('patientID');
-    const { userID, date, event, details, attachments } = req.body;
-    if (doctor[0].patientID[0].userID != userID) {
-        res.status(401);
-        throw new Error('Incorrect userID or doctor doesnt have access to this patient');
-    }
-    const filter = { userID: new mongoose.Types.ObjectId(userID) };
-    const update = {
-        $set: {
-            'timelineInformation.date': date,
-            'timelineInformation.event': event,
-            'timelineInformation.details': details,
-            'timelineInformation.attachments': attachments
-        }
-    };
-    const options = { new: true };
-    const patient = await Patient.findOneAndUpdate(filter, update, options);
-    if (!patient) {
-        res.status(404);
-        throw new Error("Patient not found");
-    }
-    if (!doctor) {
-        res.status(404);
-        throw new Error('Doctor not found');
-    }
-    res.status(201).json(patient.timelineInformation);
-});
-
 const addTimelineinfo = asyncHandler(async (req, res) => {
     const patient = await Patient.find({ userID: new mongoose.Types.ObjectId(req.body.patientID) });
-    if(!patient) {
+    if (!patient) {
         res.status(404);
         throw new Error('Patient not found');
+    }
+    if (patient[0].activeFlag == false) {
+        res.status(404);
+        throw new Error('Patient not active');
     }
     const addtimeline = new Timeline({
         date: req.body.date,
@@ -76,15 +50,35 @@ const addTimelineinfo = asyncHandler(async (req, res) => {
         attachments: req.body.attachments
     });
     console.log(addtimeline, patient)
-    try{
+    try {
         await addtimeline.save();
         patient[0].timeline.push(addtimeline._id);
+        patient[0].doctorID.push(req.params.doctorID);
         await patient[0].save();
-    }catch(err)
-    {
+    } catch (err) {
         console.error('Error saving timeline:', err);
     }
     res.status(201).json(addtimeline);
 });
 
-module.exports = { patientListnames, patientTimeHealthinfo, updatePatientTimelineinfo,addTimelineinfo };
+const unlinkPatient = asyncHandler(async (req, res) => {
+    const { patientID } = req.body;
+    const patient = await Patient.find({ userID: new mongoose.Types.ObjectId(patientID) });
+    const doctor = await Doctor.find({ _id: req.params.doctorID });
+    if (!patient) {
+        res.status(404);
+        throw new Error('Patient not found');
+    }
+    const index = patient[0].doctorID.indexOf(req.params.doctorID);
+    if (index !== -1) {
+        patient[0].doctorID.pull(req.params.doctorID);
+        doctor[0].patientID.pull(patient._id);
+        await patient[0].save();
+        await doctor[0].save();
+    }
+    else {
+        console.log("Doctor id not found");
+    }
+});
+
+module.exports = { patientListnames, patientTimeHealthinfo, addTimelineinfo };
