@@ -66,7 +66,11 @@ const patientSchema = mongoose.Schema({
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Timeline',
         }
-    ]
+    ],
+    profileimage: {
+        type: String,
+    },
+    
 },
     {
         timestamps: true,

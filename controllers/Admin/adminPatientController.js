@@ -56,7 +56,7 @@ const addPatient = asyncHandler(async (req, res) => {
     }
 
     if (hospital[0].patientInformation.indexOf(userID)) {
-        res.status(201).json({ message: 'Patient already exists' });
+        res.status(201).json({ patient });
     }
     else {
         hospital[0].patientInformation.push(patient[0]._id);

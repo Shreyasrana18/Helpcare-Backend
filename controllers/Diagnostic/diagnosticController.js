@@ -10,7 +10,7 @@ const getInformation = asyncHandler(async (req,res ) => {
         res.status(401);
         throw new Error('User not authorized');
     }
-    const information = await Diagnostic.find({userID: new mongoose.Types.ObjectId(req.params.userID)}).populate('diagnosticReport');
+    const information = await Diagnostic.find({userID: new mongoose.Types.ObjectId(req.params.userID)}).populate('diagnosticReport').populate('patientID');
     if(!information){
         res.status(404);
         throw new Error('Report not found');
@@ -58,13 +58,14 @@ const creatediagnosticID =async (userID) => {
     return diagnostic;
 };
 
+// returns all diagnostic reports uploaded by the diagnostic centre
 const getReportDiagnostic = asyncHandler(async (req,res ) => {
     if(req.params.userID != req.user.id){
         res.status(401);
         throw new Error('User not authorized');
     }
     const diagnostic = await Diagnostic.find({userID: new mongoose.Types.ObjectId(req.params.userID)}).populate('diagnosticReport');
-    res.status(201).json(diagnostic.diagnosticReport);
+    res.status(201).json(diagnostic[0].diagnosticReport);
 });
 
 const addreport = asyncHandler(async (req,res ) => {
