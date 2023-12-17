@@ -1,5 +1,4 @@
 const asyncHandler = require("express-async-handler");
-// const PatientTimeline = require("../models/timelineModel");
 const Patient = require("../../models/patientModel");
 const Timeline = require("../../models/timelineModel");
 const Report = require("../../models/reportModel");
@@ -22,30 +21,6 @@ const timelineInfo = asyncHandler(async (req, res) => {
 });
 
 
-
-// update timeline information of a patient
-const updateTimelineInfo = asyncHandler(async (req, res) => {
-    if (req.params.userID != req.user.id) {
-        res.status(401);
-        throw new Error("User not authorized");
-    }
-    const filter = { userID: new mongoose.Types.ObjectId(req.params.userID) };
-    const update = {
-        $set: {
-            'timelineInformation.date': req.body.date,
-            'timelineInformation.event': req.body.event,
-            'timelineInformation.details': req.body.details,
-            'timelineInformation.attachments': req.body.attachments
-        }
-    };
-    const options = { new: true };
-    const patient = await Patient.findOneAndUpdate(filter, update, options);
-    if (!patient) {
-        res.status(404);
-        throw new Error("Patient not found");
-    }
-    res.status(201).json(patient.timelineInformation);
-});
 
 // delete timeline information of a patient
 const deleteTimelineInfo = asyncHandler(async (req, res) => {
@@ -96,6 +71,58 @@ const removeReport = asyncHandler(async (req, res) => {
     res.status(200).json({ message: "Report removed" });
 });
 
+const addTimeline = asyncHandler(async (req, res) => {
+    const patient = await Patient.find({ userID: new mongoose.Types.ObjectId(req.params.userID) });
+
+    if (!patient) {
+        res.status(404);
+        throw new Error('Patient not found');
+    }
+    const addtimelines = new Timeline({
+        date: req.body.date,
+        event: req.body.event,
+        description: req.body.description,
+        attachments: req.body.attachments,
+        doctorName: req.body.doctorName,
+    });
+
+    try {
+        await addtimelines.save();
+        patient[0].timeline.push(addtimelines._id);
+        await patient[0].save();
+    } catch (err) {
+        console.error('Error saving timeline:', err);
+    }
+    res.status(201).json(addtimelines);
+});
+
+const addReport = asyncHandler(async (req, res) => {
+    const patient = await Patient.find({ userID: new mongoose.Types.ObjectId(req.params.userID) });
+    if (!patient) {
+        res.status(404);
+        throw new Error('Patient not found');
+    }
+    if(req.user.id != req.params.userID){
+        res.status(401);
+        throw new Error("User not authorized");
+    }
+    const addreports = new Report({
+        date: req.body.date,
+        event: req.body.event,
+        description: req.body.description,
+        attachments: req.body.attachments,
+        diagnosticCenterName: req.body.diagnosticCenterName,
+    });
+    try {
+        await addreports.save();
+        patient[0].report.push(addreports._id);
+        await patient[0].save();
+    } catch (err) {
+        console.error('Error saving report:', err);
+    }
+    res.status(201).json(addreports);
+});
+
 
 const getReport = asyncHandler(async (req, res) => {
     const patient = await Patient.find({ userID: new mongoose.Types.ObjectId(req.params.userID) }).populate('report');
@@ -126,4 +153,4 @@ const patientUnlinkDoctor = asyncHandler(async (req, res) => {
     }
     res.status(200).json({ message: "Unlinked Doctor" });
 });
-module.exports = { timelineInfo, updateTimelineInfo, deleteTimelineInfo, removeTimeline, removeReport, getTimeline, getReport, patientUnlinkDoctor }; 
+module.exports = { timelineInfo, deleteTimelineInfo, removeTimeline, removeReport, getTimeline, getReport, patientUnlinkDoctor, addTimeline, addReport }; 

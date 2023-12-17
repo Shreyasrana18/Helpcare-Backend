@@ -82,4 +82,22 @@ const changePassword = asyncHandler(async (req, res) => {
     res.status(201).json(doctor);
 });
 
-module.exports = { loginDoctor, doctorList, updateDoctorinfo, deleteDoctorinfo , changePassword};
+const doctoractiveflag = asyncHandler(async (req, res) => {
+    const doctor = await Doctor.find({ _id: req.params.doctorID });
+    if (!doctor) {
+        res.status(404);
+        throw new Error('Doctor not found');
+    }
+    if(doctor[0].activeflag == false)
+    {
+        doctor[0].activeflag = true;
+    }
+    else
+    {
+        doctor[0].activeflag = false;
+    }
+    await doctor[0].save()
+    res.status(201).json({ message: 'Doctor activeflag changed' });
+});
+
+module.exports = { loginDoctor, doctorList, updateDoctorinfo, deleteDoctorinfo , changePassword, doctoractiveflag};

@@ -15,7 +15,12 @@ const patientList = asyncHandler(async (req, res) => {
         res.status(404);
         throw new Error("Admin not found");
     }
-    res.status(201).json(admininfo[0].patientInformation);
+    let responseArray = [];
+    for (const patient of admininfo[0].patientInformation) {
+        const patientData = await Patient.find({ _id: patient._id }).populate('timeline').populate('report');
+        responseArray = responseArray.concat(patientData); // array of objects - instead of using push{ it makes it an array of arrays{ harder to retrieve information}}
+    }
+    res.status(201).json(responseArray);
 });
 
 const activepatientList = asyncHandler(async (req, res) => {
@@ -41,7 +46,7 @@ const addPatient = asyncHandler(async (req, res) => {
     const { userID } = req.body;
     const hospital = await Admin.find({ userID: new mongoose.Types.ObjectId(req.params.userID) });
 
-    const patient = await Patient.find({ userID: new mongoose.Types.ObjectId(userID) });
+    const patient = await Patient.find({ userID: new mongoose.Types.ObjectId(userID) }).populate('timeline').populate('report');
     if (hospital[0].userID.valueOf().toString() != req.user.id) {
         res.status(401);
         throw new Error("User not authorized");
@@ -90,6 +95,22 @@ const removePatientDb = asyncHandler(async (req, res) => {
     }
 });
 
+const checkOutPatient = asyncHandler(async (req, res) => {
+    const patient = await Patient.find({ userID: new mongoose.Types.ObjectId(req.body.patientID) });
+    if(req.params.userID != req.user.id){
+        res.status(401);
+        throw new Error("User not authorized");
+    }
+    if (!patient) {
+        res.status(404);
+        throw new Error('Patient not found');
+    }
+    patient[0].activeflag = false;
+    await patient[0].save();
+    res.status(201).json({ message: 'Patient checked out' });
+});
 
 
-module.exports = { activepatientList, patientList, addPatient, removePatientDb };
+
+
+module.exports = { activepatientList, patientList, addPatient, removePatientDb, checkOutPatient };

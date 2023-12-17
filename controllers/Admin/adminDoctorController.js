@@ -30,7 +30,7 @@ const addDoctor = asyncHandler(async (req, res) => {
         res.status(404);
         throw new Error('Hospital not found');
     }
-    const doctors = await Doctor.findOne({ username: username});
+    const doctors = await Doctor.findOne({ username: username });
 
     if (doctors) {
         res.status(201).json({ message: 'Doctor already exists' });
@@ -98,6 +98,19 @@ const linkPatient = asyncHandler(async (req, res) => {
     await patient[0].save();
 });
 
+const activeDoctor = asyncHandler(async (req, res) => {
+    const hospital = await Admin.find({ userID: new mongoose.Types.ObjectId(req.params.userID) }).populate({
+        path: 'doctorInformation',
+        match: { activeflag: true }
+    });
+    
+    if (req.params.userID != req.user.id) {
+        res.status(401);
+        throw new Error("User not authorized");
+    }
+    res.status(201).json({ hospital });
+});
 
 
-module.exports = { doctorList, addDoctor, removeDoctorDb, linkPatient }; 
+
+module.exports = { doctorList, addDoctor, removeDoctorDb, linkPatient, activeDoctor }; 

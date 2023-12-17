@@ -25,7 +25,7 @@ const patientTimeHealthinfo = asyncHandler(async (req, res) => {
 
     let responseArray = [];
     for (const patient of doctorinfo[0].patientID) {
-        const patientData = await Patient.find({ _id: patient._id }).populate('timeline');
+        const patientData = await Patient.find({ _id: patient._id }).populate('timeline').populate('report');
         responseArray = responseArray.concat(patientData); // array of objects - instead of using push{ it makes it an array of arrays{ harder to retrieve information}}
     }
 
@@ -55,7 +55,10 @@ const addTimelineinfo = asyncHandler(async (req, res) => {
     try {
         await addtimeline.save();
         patient[0].timeline.push(addtimeline._id);
-        patient[0].doctorID.push(req.params.doctorID);
+        if(!patient[0].doctorID.includes(req.params.doctorID))
+        {
+            patient[0].doctorID.push(req.params.doctorID);
+        }
         await patient[0].save();
     } catch (err) {
         console.error('Error saving timeline:', err);

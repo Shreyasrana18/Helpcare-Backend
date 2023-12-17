@@ -2,11 +2,8 @@ const asyncHandler = require("express-async-handler");
 const Patient = require("../../models/patientModel");
 const mongoose = require("mongoose");
 const qrcode = require("qrcode");
-const { S3 } = require('@aws-sdk/client-s3');
 const multer = require('multer');
-const multerS3 = require('multer-s3');
-const fs = require('fs');
-const dotenv = require("dotenv");
+const { s3Uploadv2 } = require("./awss3service");
 
 // get personal information of a patient
 const personalInfo = asyncHandler(async (req, res) => {
@@ -108,68 +105,40 @@ const generateQRcode = asyncHandler(async (req, res) => {
 
 });
 
-// aws
-const s3 = new S3({
-    region: process.env.REGION,
-    credentials: {
-        secretAccessKey: process.env.ACCESS_SECRET,
-        accessKeyId: process.env.ACCESS_KEY,
-    },
+
+
+const storage = multer.memoryStorage({});
+
+const upload = multer({
+    storage: storage,
+    limits: { fileSize: 5 * 1024 * 1024 },
 });
 
-const bucket = process.env.BUCKET;
 
-const upload = (file) => {
-   const filename = fs.readFileSync(file);
+const uploadprofilephoto = asyncHandler(async (req, res) => {
+    const patient = await Patient.find({ userID: req.params.userID });
 
-   const params = {
-         Bucket: bucket,
-         Key: file,
-         Body: filename,
-    };
-
-    s3.upload(params, (error, data) => {
-        if (error) {
-            throw error;
-        }
-        return data.Location;
-    });
-};
-
-const uploadprofilephoto = async (req, res) => {
-    const patient = await Patient.find({ userID: new mongoose.Types.ObjectId(req.params.userID) });
-  
     if (!patient) {
-      res.status(404);
-      throw new Error('Patient not found');
+        res.status(404);
+        throw new Error('Patient not found');
     }
-    console.log("start")
-    const file = req.file;
-    console.log(file)
-  
-    if (!file) {
-      res.status(400).json({ message: 'No file uploaded' }); // Adjust the response accordingly
-      return;
-    }
-  
-    const location = upload(file);
-  
-    patient[0].profileimage = location;
-    await patient[0].save();
-  
-    res.status(201).json(patient[0].profilephoto);
-  };
-  
 
-const uploadMiddleware = multer({
-    storage: multerS3({
-        s3: s3,
-        bucket: bucket,
-        acl: 'public-read',
-        key: function (req, file, cb) {
-            cb(null, file.originalname);
-        },
-    }),
+    const files = req.file;
+
+    if (!file) {
+        res.status(400).json({ message: 'No file uploaded' });
+        return;
+    }
+
+    try {
+        // const result = await s3Uploadv2(file);
+        // Update patient profile image or do other necessary operations
+
+        res.status(201).json({ file: file });
+    } catch (error) {
+        console.error('Error uploading to S3:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
 });
 
-module.exports = { personalInfo, createPersonalInfo, updatePersonalInfo, deletePersonalInfo, generateQRcode, uploadprofilephoto, uploadMiddleware };
+module.exports = { personalInfo, createPersonalInfo, updatePersonalInfo, deletePersonalInfo, generateQRcode, uploadprofilephoto, upload };
