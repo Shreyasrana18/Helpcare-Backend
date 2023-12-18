@@ -80,4 +80,4 @@ const deleteAdmininfo = asyncHandler(async (req, res) => {
 });
 
 
-    module.exports = { adminInfo, updateAdmininfo, createAdminID , deleteAdmininfo};
+module.exports = { adminInfo, updateAdmininfo, createAdminID , deleteAdmininfo};

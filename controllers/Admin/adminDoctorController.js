@@ -82,6 +82,8 @@ const linkPatient = asyncHandler(async (req, res) => {
     const { patientID, doctorID } = req.body;
     const doctor = await Doctor.find({ _id: new mongoose.Types.ObjectId(doctorID) });
     const patient = await Patient.find({ userID: new mongoose.Types.ObjectId(patientID) });
+    patient[0].activeflag = true;
+    await patient[0].save();
     if (!doctor || !patient) {
         res.status(404);
         throw new Error('Doctor or Patient not found');
@@ -94,8 +96,6 @@ const linkPatient = asyncHandler(async (req, res) => {
         await doctor[0].save();
         res.status(201).json({ message: 'Patient added to doctor successfully' });
     }
-    patient[0].activeFlag = true;
-    await patient[0].save();
 });
 
 const activeDoctor = asyncHandler(async (req, res) => {
