@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const qrcode = require("qrcode");
 const multer = require('multer');
 const { s3Uploadv2 } = require("./awss3service");
+const bcrypt = require("bcryptjs");
 
 // get personal information of a patient
 const personalInfo = asyncHandler(async (req, res) => {

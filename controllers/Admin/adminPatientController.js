@@ -59,13 +59,13 @@ const addPatient = asyncHandler(async (req, res) => {
         res.status(404);
         throw new Error('Patient not found');
     }
-
-    if (hospital[0].patientInformation.indexOf(userID)) {
+    if (hospital[0].patientInformation.indexOf(patient[0]._id)!=-1) {
         res.status(201).json({ patient });
     }
     else {
         hospital[0].patientInformation.push(patient[0]._id);
         await hospital[0].save();
+        console.log("Patient ID successfully added to the array.")
     }
     res.status(201).json({ patient });
 });
