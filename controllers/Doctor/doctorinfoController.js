@@ -51,6 +51,8 @@ const loginDoctor = asyncHandler(async (req, res) => {
         res.status(401);
         throw new Error('Password is incorrect');
     }
+    doctor[0].activeflag = true;
+    await doctor[0].save();
     res.status(201).json(doctor);
 });
 

@@ -5,25 +5,25 @@ const Patient = require('../../models/patientModel');
 const mongoose = require('mongoose');
 
 
-const getInformation = asyncHandler(async (req,res ) => {
-    if(req.params.userID != req.user.id){
+const getInformation = asyncHandler(async (req, res) => {
+    if (req.params.userID != req.user.id) {
         res.status(401);
         throw new Error('User not authorized');
     }
-    const information = await Diagnostic.find({userID: new mongoose.Types.ObjectId(req.params.userID)}).populate('diagnosticReport').populate('patientID');
-    if(!information){
+    const information = await Diagnostic.find({ userID: new mongoose.Types.ObjectId(req.params.userID) }).populate('diagnosticReport').populate('patientID');
+    if (!information) {
         res.status(404);
         throw new Error('Report not found');
     }
     res.status(201).json(information[0]);
 });
 
-const updateInformation = asyncHandler(async (req,res ) => {
-    if(req.params.userID != req.user.id){
+const updateInformation = asyncHandler(async (req, res) => {
+    if (req.params.userID != req.user.id) {
         res.status(401);
         throw new Error('User not authorized');
     }
-    const filter = {userID: new mongoose.Types.ObjectId(req.params.userID)};
+    const filter = { userID: new mongoose.Types.ObjectId(req.params.userID) };
     const update = {
         $set: {
             'name': req.body.name,
@@ -32,9 +32,9 @@ const updateInformation = asyncHandler(async (req,res ) => {
             'email': req.body.email,
         }
     }
-    const options = {new: true};
-    const diagnostic = await Diagnostic.findOneAndUpdate(filter,update,options);
-    if(!diagnostic){
+    const options = { new: true };
+    const diagnostic = await Diagnostic.findOneAndUpdate(filter, update, options);
+    if (!diagnostic) {
         res.status(404);
         throw new Error('Diagnostic not found');
     }
@@ -42,45 +42,71 @@ const updateInformation = asyncHandler(async (req,res ) => {
 
 });
 
-const creatediagnosticID =async (userID) => {
-    if(!userID){
+const creatediagnosticID = async (userID) => {
+    if (!userID) {
         res.status(404);
         throw new Error('Enter userID');
     }
     const diagnostic = new Diagnostic({
         userID: userID,
     });
-    try{
+    try {
         await diagnostic.save();
-    }catch(error){
-        console.error('Error saving diagnostic:',error);
+    } catch (error) {
+        console.error('Error saving diagnostic:', error);
     }
     return diagnostic;
 };
 
 // returns all diagnostic reports uploaded by the diagnostic centre
-const getReportDiagnostic = asyncHandler(async (req,res ) => {
-    if(req.params.userID != req.user.id){
+const getReportDiagnostic = asyncHandler(async (req, res) => {
+    if (req.params.userID != req.user.id) {
         res.status(401);
         throw new Error('User not authorized');
     }
-    const diagnostic = await Diagnostic.find({userID: new mongoose.Types.ObjectId(req.params.userID)}).populate('diagnosticReport');
+    const diagnostic = await Diagnostic.find({ userID: new mongoose.Types.ObjectId(req.params.userID) }).populate('diagnosticReport');
     res.status(201).json(diagnostic[0].diagnosticReport);
 });
 
-const addreport = asyncHandler(async (req,res ) => {
-    if(req.params.userID != req.user.id){
+const addPatient = asyncHandler(async (req, res) => {
+    if (req.params.userID != req.user.id) {
         res.status(401);
         throw new Error('User not authorized');
     }
-    const diagnostic = await Diagnostic.find({userID: new mongoose.Types.ObjectId(req.params.userID)});
-    const patient = await Patient.find({userID: new mongoose.Types.ObjectId(req.body.patientID)});
-    
-    if(!patient){
+    const diagnostic = await Diagnostic.find({ userID: new mongoose.Types.ObjectId(req.params.userID) });
+    const patient = await Patient.find({ userID: new mongoose.Types.ObjectId(req.body.patientID) });
+    if (!patient) {
         res.status(404);
         throw new Error('Patient not found');
     }
-    if(patient[0].activeFlag == false){
+    if (!diagnostic) {
+        res.status(404);
+        throw new Error('Diagnostic not found');
+    }
+    if (diagnostic[0].patientID.indexOf(patient[0]._id) != -1) {
+        res.status(201).json({ patient });
+    }
+    else {
+        diagnostic[0].patientID.push(patient[0]._id);
+        await diagnostic[0].save();
+        console.log("Patient ID successfully added to the array.");
+    }
+    res.status(201).json({ patient });
+});
+
+const addreport = asyncHandler(async (req, res) => {
+    if (req.params.userID != req.user.id) {
+        res.status(401);
+        throw new Error('User not authorized');
+    }
+    const diagnostic = await Diagnostic.find({ userID: new mongoose.Types.ObjectId(req.params.userID) });
+    const patient = await Patient.find({ userID: new mongoose.Types.ObjectId(req.body.patientID) });
+
+    if (!patient) {
+        res.status(404);
+        throw new Error('Patient not found');
+    }
+    if (patient[0].activeFlag == false) {
         res.status(404);
         throw new Error('Patient not active');
     }
@@ -92,19 +118,19 @@ const addreport = asyncHandler(async (req,res ) => {
         diagnosticCenterName: diagnostic[0].name,
     });
 
-    if(!diagnostic[0].patientID.includes(patient[0]._id)){
+    if (!diagnostic[0].patientID.includes(patient[0]._id)) {
         diagnostic[0].patientID.push(patient[0]._id);
     }
-    try{
+    try {
         await report.save();
         diagnostic[0].diagnosticReport.push(report._id);
         patient[0].report.push(report._id);
         await diagnostic[0].save();
         await patient[0].save();
-    }catch(error){
-        console.error('Error saving report:',error);
+    } catch (error) {
+        console.error('Error saving report:', error);
     }
     res.status(201).json(report);
 });
 
-module.exports = {getInformation, updateInformation, creatediagnosticID, getReportDiagnostic, addreport};
+module.exports = { getInformation, updateInformation, creatediagnosticID, getReportDiagnostic, addreport, addPatient };
