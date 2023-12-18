@@ -126,12 +126,19 @@ const addReport = asyncHandler(async (req, res) => {
 
 const getReport = asyncHandler(async (req, res) => {
     const patient = await Patient.find({ userID: new mongoose.Types.ObjectId(req.params.userID) }).populate('report');
-    res.status(201).json(patient[0].report);
+    const report = patient[0].report;
+
+    const reversedReport = report.reverse();
+    res.status(201).json(reversedReport);
 });
 
 const getTimeline = asyncHandler(async (req, res) => {
     const patient = await Patient.find({ userID: new mongoose.Types.ObjectId(req.params.userID) }).populate('timeline');
-    res.status(201).json(patient[0].timeline);
+    const timeline = patient[0].timeline;
+
+    // Sort the timeline array in reverse order based on the creation date (assuming there is a 'createdAt' field)
+    const reversedTimeline = timeline.reverse();
+    res.status(201).json(reversedTimeline);
 });
 
 const patientUnlinkDoctor = asyncHandler(async (req, res) => {
