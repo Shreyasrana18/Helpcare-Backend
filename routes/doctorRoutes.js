@@ -12,5 +12,4 @@ router.route('/timelineinfo/:doctorID').post(addTimelineinfo);
 router.route('/doctorlogin').post(loginDoctor);
 
 router.route('/activeflag/:doctorID').post(doctoractiveflag);
-
 module.exports = router;

@@ -107,6 +107,7 @@ const generateQRcode = asyncHandler(async (req, res) => {
 
 
 
+
 const storage = multer.memoryStorage({});
 
 const upload = multer({
@@ -125,20 +126,29 @@ const uploadprofilephoto = asyncHandler(async (req, res) => {
 
     const files = req.file;
 
-    if (!file) {
+    if (!files) {
         res.status(400).json({ message: 'No file uploaded' });
         return;
     }
 
     try {
-        // const result = await s3Uploadv2(file);
-        // Update patient profile image or do other necessary operations
-
-        res.status(201).json({ file: file });
+        const result = await s3Uploadv2(files);
+        patient[0].profileimage=result;
+        await patient[0].save();
+        res.status(201).json({ file: result});
     } catch (error) {
         console.error('Error uploading to S3:', error);
         res.status(500).json({ message: 'Internal server error' });
     }
 });
 
-module.exports = { personalInfo, createPersonalInfo, updatePersonalInfo, deletePersonalInfo, generateQRcode, uploadprofilephoto, upload };
+const uploadDocuments = asyncHandler(async (req, res) => {
+    const files =req.file;
+    if(!files){
+        res.status(400).json({ message: 'No file uploaded' });
+    }
+    const result = await s3Uploadv2(files);
+    res.status(201).json({ file: result});
+});
+
+module.exports = { personalInfo, createPersonalInfo, updatePersonalInfo, deletePersonalInfo, generateQRcode, uploadprofilephoto, upload,uploadDocuments };

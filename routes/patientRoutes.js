@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
 
-const { personalInfo,updatePersonalInfo, deletePersonalInfo, generateQRcode,uploadprofilephoto, upload } = require('../controllers/Patient/patientController');
+const { personalInfo, updatePersonalInfo, deletePersonalInfo, generateQRcode, uploadprofilephoto, upload } = require('../controllers/Patient/patientController');
 const { healthinfo, updateHealthInfo, deleteHealthInfo } = require('../controllers/Patient/HealthInformationController');
-const { timelineInfo, removeTimeline, removeReport, getTimeline,getReport, patientUnlinkDoctor, addTimeline, addReport } = require('../controllers/Patient/timelineController');
+const { timelineInfo, removeTimeline, removeReport, getTimeline, getReport, patientUnlinkDoctor, addTimeline, addReport } = require('../controllers/Patient/timelineController');
 const validateToken = require('../middleware/validateTokenHandler');
 
 
@@ -23,7 +23,6 @@ router.route('/report/:userID').delete(removeReport).get(getReport).post(addRepo
 
 // Routes to unlink doctor from patient
 router.route('/timeline/unlink/:userID').post(patientUnlinkDoctor);
-router.route('/upload/:userID').post(upload.single("file"),uploadprofilephoto);
 
 // Routes to upload profile photo
 
