@@ -3,7 +3,11 @@ const Patient = require("../../models/patientModel");
 const mongoose = require("mongoose");
 const CryptoJS = require("crypto-js");
 
-const secretKey = '123345';
+const dotenv = require("dotenv").config();
+
+
+const secretKey = process.env.secretKey;
+
 const decryptValue = (encryptedValue, secretKey) => {
     const bytes = CryptoJS.AES.decrypt(encryptedValue, secretKey);
     return bytes.toString(CryptoJS.enc.Utf8);

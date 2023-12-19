@@ -5,8 +5,10 @@ const Patient = require("../../models/patientModel");
 const mongoose = require("mongoose");
 const CryptoJS = require("crypto-js");
 
+const dotenv = require("dotenv").config();
 
-const secretKey = '123345';
+
+const secretKey = process.env.secretKey;
 
 const decryptValue = (encryptedValue, secretKey) => {
     const bytes = CryptoJS.AES.decrypt(encryptedValue, secretKey);

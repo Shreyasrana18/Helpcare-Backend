@@ -6,9 +6,10 @@ const multer = require('multer');
 const { s3Uploadv2 } = require("./awss3service");
 const bcrypt = require("bcryptjs");
 const CryptoJS = require("crypto-js");
+const dotenv = require("dotenv").config();
 
 
-const secretKey = '123345';
+const secretKey = process.env.secretKey;
 const decryptValue = (encryptedValue, secretKey) => {
     const bytes = CryptoJS.AES.decrypt(encryptedValue, secretKey);
     return bytes.toString(CryptoJS.enc.Utf8);

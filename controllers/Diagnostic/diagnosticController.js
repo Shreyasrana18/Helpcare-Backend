@@ -3,6 +3,20 @@ const Report = require('../../models/reportModel');
 const Diagnostic = require('../../models/diagnosticModel');
 const Patient = require('../../models/patientModel');
 const mongoose = require('mongoose');
+const CryptoJS = require('crypto-js');
+
+const dotenv = require("dotenv").config();
+
+
+const secretKey = process.env.secretKey;
+
+const decryptValue = (encryptedValue, secretKey) => {
+    const bytes = CryptoJS.AES.decrypt(encryptedValue, secretKey);
+    return bytes.toString(CryptoJS.enc.Utf8);
+};
+
+
+
 
 
 const getInformation = asyncHandler(async (req, res) => {
@@ -83,6 +97,29 @@ const addPatient = asyncHandler(async (req, res) => {
         res.status(404);
         throw new Error('Diagnostic not found');
     }
+    const decryptedPatientPersonalInfo = {
+        address: decryptValue(patient[0].patientPersonalInformation.address, secretKey),
+        age: decryptValue(patient[0].patientPersonalInformation.age, secretKey),
+        contact: decryptValue(patient[0].patientPersonalInformation.contact, secretKey),
+        email: decryptValue(patient[0].patientPersonalInformation.email, secretKey),
+        gender: decryptValue(patient[0].patientPersonalInformation.gender, secretKey),
+        name: decryptValue(patient[0].patientPersonalInformation.name, secretKey),
+        emergencycontact: decryptValue(patient[0].patientPersonalInformation.emergencycontact, secretKey),
+    };
+
+    // Decrypt patient's health information
+    const decryptedHealthInfo = {
+        allergies: decryptValue(patient[0].healthInformation.allergies, secretKey),
+        bloodgroup: decryptValue(patient[0].healthInformation.bloodgroup, secretKey),
+        bmi: decryptValue(patient[0].healthInformation.bmi, secretKey),
+        height: decryptValue(patient[0].healthInformation.height, secretKey),
+        weight: decryptValue(patient[0].healthInformation.weight, secretKey),
+    };
+
+    // Update the decrypted information
+    patient[0].patientPersonalInformation = decryptedPatientPersonalInfo;
+    patient[0].healthInformation = decryptedHealthInfo;
+    
     if (diagnostic[0].patientID.indexOf(patient[0]._id) != -1) {
         res.status(201).json({ patient });
     }
