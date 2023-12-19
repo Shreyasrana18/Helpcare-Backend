@@ -9,7 +9,7 @@ const patientSchema = mongoose.Schema({
             type: String,
         },
         age: {
-            type: Number,
+            type: String,
         },
         gender: {
             type: String,
@@ -18,13 +18,13 @@ const patientSchema = mongoose.Schema({
             type: String,
         },
         contact: {
-            type: Number,
+            type: String,
         },
         email: {
             type: String,
         },
         emergencycontact: {
-            type: Number,
+            type: String,
         },
     },
     healthInformation: {
@@ -35,10 +35,10 @@ const patientSchema = mongoose.Schema({
             type: String,
         },
         weight: {
-            type: Number,
+            type: String,
         },
         height: {
-            type: Number,
+            type: String,
         },
         bmi: {
             type: String,
